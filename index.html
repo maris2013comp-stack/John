@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JOHN — Life OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --s1: #111111;
+  --s2: #181818;
+  --s3: #1e1e1e;
+  --gold: #c9a84c;
+  --gold-dim: rgba(201,168,76,0.12);
+  --gold-line: rgba(201,168,76,0.22);
+  --text: #f0ede8;
+  --muted: rgba(240,237,232,0.5);
+  --dim: rgba(240,237,232,0.2);
+  --r: 11px;
+  --r-sm: 7px;
+  --sw: 220px;
+  --cw: 280px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.18);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:rgba(201,168,76,0.35)}
+
+/* LAYOUT */
+#app{display:flex;height:100vh;width:100vw}
+
+/* SIDEBAR */
+#sidebar{width:var(--sw);min-width:var(--sw);background:var(--s1);border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;overflow:hidden}
+.sb-logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.logo-name{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold);letter-spacing:4px;line-height:1}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;margin-top:5px}
+.sb-nav{flex:1;overflow-y:auto;padding:10px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:var(--muted);font-size:13px;transition:all .15s;position:relative}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+.nav-item.active{color:var(--gold);background:rgba(201,168,76,0.07)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);border-radius:0 2px 2px 0}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+
+/* LIFE SCORE WIDGET */
+.ls-widget{padding:16px 20px 20px;border-top:1px solid var(--gold-line);background:linear-gradient(to bottom,transparent,rgba(201,168,76,0.03));flex-shrink:0}
+.ls-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.ls-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.ls-num{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--gold);line-height:1}
+.ls-bars{display:flex;flex-direction:column;gap:7px}
+.ls-row{display:flex;align-items:center;gap:8px}
+.ls-rl{font-size:10px;color:var(--muted);width:68px;flex-shrink:0}
+.ls-track{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.ls-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .6s ease}
+.ls-rv{font-size:10px;color:var(--muted);width:24px;text-align:right}
+
+/* MAIN CONTENT */
+#content{flex:1;overflow-y:auto;padding:28px;min-width:0}
+
+/* CARDS */
+.card{background:var(--s2);border-radius:var(--r);border-top:1px solid var(--gold-line);padding:20px;margin-bottom:14px}
+.card-sm{background:var(--s2);border-radius:var(--r);border-top:1px solid var(--gold-line);padding:15px}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text);letter-spacing:1px;text-transform:uppercase}
+
+/* MORNING BRIEF */
+.brief{background:linear-gradient(135deg,#111111 0%,#131209 100%);border-radius:var(--r);border-top:1px solid var(--gold-line);padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.brief::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%);pointer-events:none}
+.brief-greet{font-family:'Syne',sans-serif;font-size:23px;font-weight:700;margin-bottom:4px}
+.brief-date{font-size:12px;color:var(--muted);margin-bottom:16px}
+.brief-body{font-size:13.5px;color:rgba(240,237,232,0.72);line-height:1.75;border-left:2px solid var(--gold);padding-left:14px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.stat-card{background:var(--s2);border-radius:var(--r);border-top:1px solid var(--gold-line);padding:16px}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:700}
+.stat-unit{font-size:13px;color:var(--gold);margin-left:2px}
+.stat-sub{font-size:11px;color:var(--dim);margin-top:4px}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,0.03);border-radius:7px;padding:3px;margin-bottom:14px}
+.tab{flex:1;padding:7px 10px;border:none;background:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:5px;transition:all .15s}
+.tab.active{background:var(--s3);color:var(--gold)}
+
+/* TASKS */
+.task-list{display:flex;flex-direction:column;gap:7px;min-height:40px}
+.task-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s1);border-radius:var(--r-sm);transition:background .15s}
+.task-item:hover{background:rgba(255,255,255,0.04)}
+.task-check{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;background:none;font-size:10px;color:white}
+.task-check.done{background:#2a7a4b;border-color:#2a7a4b}
+.task-txt{flex:1;font-size:13px}
+.task-txt.done{text-decoration:line-through;color:var(--muted)}
+.task-dl{font-size:11px;color:var(--dim);flex-shrink:0}
+.task-progress{margin-top:12px}
+.progress-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.pbar{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.pbar-fill{height:100%;background:linear-gradient(to right,var(--gold),rgba(201,168,76,0.55));border-radius:2px;transition:width .4s ease}
+.add-task-btn{display:flex;align-items:center;gap:8px;padding:9px 12px;background:none;border:1px dashed rgba(255,255,255,0.07);border-radius:var(--r-sm);color:var(--muted);font-size:12px;cursor:pointer;width:100%;margin-top:8px;transition:all .15s;font-family:'Inter',sans-serif}
+.add-task-btn:hover{border-color:var(--gold-line);color:var(--gold)}
+.empty-state{text-align:center;padding:20px;color:var(--dim);font-size:13px}
+
+/* MOOD */
+.mood-emojis{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.mood-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 11px;background:var(--s1);border:1px solid transparent;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.mood-btn:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.07)}
+.mood-btn.selected{border-color:var(--gold);background:var(--gold-dim)}
+.mood-emoji{font-size:20px}
+.mood-lbl{font-size:10px;color:var(--muted)}
+.energy-dots{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
+.edot{width:28px;height:28px;border-radius:50%;background:var(--s1);border:1px solid rgba(255,255,255,0.06);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);transition:all .15s;font-family:'Inter',sans-serif}
+.edot.active{background:var(--gold);border-color:var(--gold);color:#0a0a0a;font-weight:600}
+
+/* INPUTS */
+input[type=text],input[type=number],input[type=password],input[type=date],textarea,select{background:var(--s1);border:1px solid rgba(255,255,255,0.07);border-radius:var(--r-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:10px 12px;width:100%;outline:none;transition:border-color .15s;resize:none}
+input[type=text]:focus,input[type=number]:focus,input[type=password]:focus,textarea:focus,select:focus{border-color:rgba(201,168,76,0.3)}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+select option{background:var(--s2)}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:var(--r-sm);border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;transition:all .15s}
+.btn-gold{background:var(--gold);color:#0a0a0a}
+.btn-gold:hover{background:#d4b060}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--muted)}
+.btn-ghost:hover{background:rgba(255,255,255,0.09);color:var(--text)}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* CHAT */
+#chat{width:var(--cw);min-width:var(--cw);background:var(--s1);border-left:1px solid rgba(255,255,255,0.04);border-top:2px solid var(--gold-line);display:flex;flex-direction:column}
+.chat-hdr{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0}
+.chat-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--gold);letter-spacing:1px}
+.chat-status{font-size:11px;color:var(--muted);margin-top:2px}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px}
+.msg{max-width:96%;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.55}
+.msg-user{align-self:flex-end;background:var(--gold-dim);border:1px solid var(--gold-line);color:var(--text)}
+.msg-ai{align-self:flex-start;background:var(--s2);color:var(--text);border:1px solid rgba(255,255,255,0.05)}
+.msg-ai-name{font-size:10px;color:var(--gold);font-weight:600;letter-spacing:1px;margin-bottom:4px}
+.chat-input-area{padding:12px;border-top:1px solid rgba(255,255,255,0.04);flex-shrink:0}
+.chat-row{display:flex;gap:6px;align-items:flex-end}
+.chat-in{flex:1;background:var(--s2);border:1px solid rgba(255,255,255,0.07);border-radius:9px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:9px 12px;outline:none;resize:none;max-height:100px;transition:border-color .15s}
+.chat-in:focus{border-color:rgba(201,168,76,0.3)}
+.chat-send-btn{width:34px;height:34px;border-radius:9px;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:13px;color:#0a0a0a}
+.chat-send-btn:hover{background:#d4b060}
+.chat-send-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(5px)}
+.modal{background:var(--s2);border-radius:14px;border-top:2px solid var(--gold);padding:32px;width:420px;max-width:90vw}
+.modal-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--gold);margin-bottom:8px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.65}
+
+/* TYPING */
+.typing{display:flex;gap:3px;padding:4px 0}
+.typing span{width:5px;height:5px;background:var(--gold);border-radius:50%;opacity:.5;animation:bounce 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px}
+.inv-total{background:linear-gradient(135deg,#111111,#131108);border-radius:var(--r);border-top:2px solid var(--gold-line);padding:28px 24px;margin-bottom:14px;text-align:center}
+.news-card{background:var(--s2);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s;cursor:default}
+.news-card:hover{box-shadow:0 6px 28px rgba(0,0,0,0.45);transform:translateY(-1px)}
+.news-glow{position:absolute;top:0;right:0;width:100px;height:100px;pointer-events:none;border-radius:50%}
+
+/* SECTION */
+.sec-hdr{margin-bottom:22px}
+.sec-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700}
+.sec-sub{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* DREAM TRACKER */
+.dream-card{background:linear-gradient(135deg,#111111,#12100d);border-radius:var(--r);border-top:1px solid var(--gold-line);padding:20px;margin-bottom:14px}
+.dream-bar-track{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin:10px 0 8px}
+.dream-bar-fill{height:100%;background:linear-gradient(to right,var(--gold),rgba(201,168,76,0.45));border-radius:3px;transition:width .8s ease}
+
+/* PREDICTION */
+.pred-card{background:var(--s2);border-radius:var(--r-sm);border-left:2px solid var(--gold);padding:11px 14px;margin-bottom:8px;font-size:13px;color:rgba(240,237,232,.75);line-height:1.55}
+
+/* PLACEHOLDER */
+.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:380px;gap:12px;opacity:.5}
+.placeholder-icon{font-size:52px}
+.placeholder-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:600}
+.placeholder-sub{font-size:13px;color:var(--muted)}
+
+/* QUEST BADGE */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* GRID HELPERS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.col{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:8px}
+.mt8{margin-top:8px}
+.mt12{margin-top:12px}
+.mt16{margin-top:16px}
+.gold{color:var(--gold)}
+.sm{font-size:12px}
+.xs{font-size:11px}
+.fw6{font-weight:600}
+.syne{font-family:'Syne',sans-serif}
+
+/* MOBILE */
+.mobile-topbar{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:var(--s1);border-bottom:1px solid rgba(255,255,255,0.06);align-items:center;justify-content:space-between;padding:0 14px;z-index:150}
+.mob-btn{background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;padding:8px;line-height:1;border-radius:6px;transition:background .15s}
+.mob-btn:hover{background:rgba(255,255,255,0.08)}
+.mob-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);letter-spacing:3px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.62);z-index:145}
+.sidebar-overlay.open{display:block}
+@media(max-width:768px){
+  .mobile-topbar{display:flex}
+  #app{padding-top:52px}
+  .sb-logo{display:none}
+  #sidebar{position:fixed;left:-260px;top:52px;bottom:0;width:240px;min-width:240px;z-index:155;transition:left .25s ease}
+  #sidebar.open{left:0}
+  #content{padding:14px;height:calc(100vh - 52px)}
+  #chat{position:fixed;right:-110%;top:52px;bottom:0;width:min(360px,100vw);min-width:0;z-index:155;transition:right .25s ease}
+  #chat.open{right:0}
+  .stats-row{grid-template-columns:repeat(2,1fr)!important}
+  .grid-2{grid-template-columns:1fr!important}
+  [style*="grid-template-columns:repeat(2,1fr)"]{grid-template-columns:1fr!important}
+  [style*="grid-template-columns:2fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important}
+  .brief{padding:16px}
+  .sec-title{font-size:20px}
+  .modal{padding:20px;width:calc(100vw - 32px)}
+  .inv-total{padding:20px 16px}
+  .ls-rl{width:54px}
+}
+</style>
+</head>
+<body>
+<div class="mobile-topbar">
+  <button class="mob-btn" onclick="toggleSidebar()">☰</button>
+  <div class="mob-logo">JOHN</div>
+  <button class="mob-btn" onclick="toggleChat()">💬</button>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sb-logo">
+      <div class="logo-name">JOHN</div>
+      <div class="logo-sub">Life OS</div>
+    </div>
+    <div class="sb-nav" id="nav"></div>
+    <div class="ls-widget" id="ls-widget"></div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="content"></main>
+
+  <!-- JOHN AI CHAT -->
+  <aside id="chat">
+    <div class="chat-hdr">
+      <div class="chat-title">JOHN AI</div>
+      <div class="chat-status" id="chat-status">● Aktīvs</div>
+    </div>
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="chat-input-area">
+      <div class="chat-row">
+        <textarea class="chat-in" id="chat-in" placeholder="Jautā JOHN..." rows="1"></textarea>
+        <button class="chat-send-btn" id="chat-send">➤</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const S = {
+  sec: 'dashboard',
+  activeTab: 'today',
+  addingTask: false,
+  selMoods: [],
+  energy: 0,
+  tasks: load('tasks', {today:[],week:[],month:[],year:[]}),
+  mood: load('mood', {}),
+  journal: load('journal', []),
+  finance: load('finance', {income:[],expenses:[],monthlyGoal:0}),
+  body: load('body', {}),
+  inv: load('inv', {gold:0,silver:0,stocks:[]}),
+  dream: load('dream', {name:'',target:0,current:0}),
+  brain: load('brain', []),
+  ls: load('ls', {finance:0,health:0,productivity:0,sleep:0,mood:0}),
+  chat: load('chat', []),
+  goals: load('goals', []),
+  news: load('news', []),
+  ideas: load('ideas', []),
+  kb: load('kb', []),
+  reviews: load('reviews', []),
+  moodLog: load('moodLog', []),
+};
+
+function load(k, def) {
+  try { return JSON.parse(localStorage.getItem('j_'+k)) ?? def; }
+  catch { return def; }
+}
+function save(k) { localStorage.setItem('j_'+k, JSON.stringify(S[k])); }
+
+// ─── NAV CONFIG ──────────────────────────────────────────
+const NAV = [
+  {id:'dashboard',icon:'⚡',lbl:'Dashboard'},
+  {id:'goals',icon:'🎯',lbl:'Goals'},
+  {id:'side-quests',icon:'🗺️',lbl:'Side Quests'},
+  {id:'journal',icon:'📓',lbl:'Journal'},
+  {id:'second-brain',icon:'🧠',lbl:'Second Brain'},
+  {id:'finance',icon:'💰',lbl:'Finance'},
+  {id:'body',icon:'💪',lbl:'Body'},
+  {id:'investments',icon:'📈',lbl:'Investments'},
+  {id:'mood',icon:'😊',lbl:'Mood'},
+  {id:'news',icon:'🌍',lbl:'News'},
+  {id:'ideas',icon:'💡',lbl:'Ideas'},
+  {id:'knowledge',icon:'📚',lbl:'Knowledge Base'},
+  {id:'ceo-review',icon:'🔥',lbl:'Weekly CEO Review'},
+  {id:'timeline',icon:'📸',lbl:'Life Timeline'},
+  {id:'settings',icon:'⚙️',lbl:'Settings'},
+];
+
+// ─── UTILS ───────────────────────────────────────────────
+function greet() {
+  const h = new Date().getHours();
+  return h<12 ? 'Labrīt, Boss' : h<18 ? 'Labdien, Boss' : 'Labvakar, Boss';
+}
+
+function dateStr() {
+  const DAYS = ['Svētdiena','Pirmdiena','Otrdiena','Trešdiena','Ceturtdiena','Piektdiena','Sestdiena'];
+  const MONTHS = ['janvāris','februāris','marts','aprīlis','maijs','jūnijs','jūlijs','augusts','septembris','oktobris','novembris','decembris'];
+  const d = new Date();
+  return `${DAYS[d.getDay()]}, ${d.getDate()}. ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function lsTotal() {
+  const v = Object.values(S.ls);
+  return Math.round(v.reduce((a,b)=>a+b,0)/v.length);
+}
+
+function todayStats() {
+  const t = S.tasks.today||[];
+  return {total:t.length, done:t.filter(x=>x.done).length};
+}
+
+function streak() { return parseInt(localStorage.getItem('j_streak')||'0'); }
+
+function monthlySavings() {
+  const m=new Date().getMonth(), y=new Date().getFullYear();
+  const inc=(S.finance.income||[]).filter(i=>{const d=new Date(i.date);return d.getMonth()===m&&d.getFullYear()===y;}).reduce((a,i)=>a+Number(i.amount),0);
+  const exp=(S.finance.expenses||[]).filter(e=>{const d=new Date(e.date);return d.getMonth()===m&&d.getFullYear()===y;}).reduce((a,e)=>a+Number(e.amount),0);
+  return Math.max(0, inc-exp);
+}
+
+function totalBalance() {
+  const inc=(S.finance.income||[]).reduce((a,i)=>a+Number(i.amount),0);
+  const exp=(S.finance.expenses||[]).reduce((a,e)=>a+Number(e.amount),0);
+  return inc-exp;
+}
+
+function fmt(n) { return Number(n).toLocaleString('lv'); }
+
+// ─── RENDER NAV ──────────────────────────────────────────
+function renderNav() {
+  document.getElementById('nav').innerHTML = NAV.map(n=>`
+    <div class="nav-item${S.sec===n.id?' active':''}" onclick="go('${n.id}')">
+      <span class="nav-icon">${n.icon}</span><span>${n.lbl}</span>
+    </div>`).join('');
+}
+
+// ─── RENDER LIFE SCORE ───────────────────────────────────
+function renderLS() {
+  const bars = [
+    {l:'Finance',k:'finance'},{l:'Veselība',k:'health'},
+    {l:'Produkt.',k:'productivity'},{l:'Miegs',k:'sleep'},{l:'Garastāv.',k:'mood'}
+  ];
+  document.getElementById('ls-widget').innerHTML = `
+    <div class="ls-top">
+      <span class="ls-label">Life Score</span>
+      <span class="ls-num">${lsTotal()}</span>
+    </div>
+    <div class="ls-bars">
+      ${bars.map(b=>`
+        <div class="ls-row">
+          <span class="ls-rl">${b.l}</span>
+          <div class="ls-track"><div class="ls-fill" style="width:${S.ls[b.k]||0}%"></div></div>
+          <span class="ls-rv">${S.ls[b.k]||0}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ─── DYNAMIC PREDICTIONS ─────────────────────────────────
+function dreamYearEstimate() {
+  if(!S.dream.target||!S.dream.current) return 'Pievieno datus, lai JOHN varētu prognozēt.';
+  const remaining = S.dream.target - S.dream.current;
+  const sav = monthlySavings();
+  if(sav<=0) return 'Sāc ietaupīt, lai JOHN varētu prognozēt termiņu.';
+  const months = Math.ceil(remaining/sav);
+  const year = new Date().getFullYear() + Math.floor(months/12);
+  const mo = months%12;
+  return `JOHN prognozē: mērķi sasniegsi aptuveni <span class="gold">${year}. gadā${mo>0?' ('+mo+' mēn.)':''}</span>`;
+}
+
+function renderPredictions(str, sav) {
+  const preds = [];
+  if(S.dream.target>0 && sav>0) {
+    const months = Math.ceil((S.dream.target-S.dream.current)/sav);
+    const year = new Date().getFullYear()+Math.floor(months/12);
+    preds.push(`📊 Ja turpināsi krāt šajā tempā (€${fmt(sav)}/mēn.), sapni sasniegsi <span class="gold">${year}. gadā</span>.`);
+  } else if(S.dream.target>0) {
+    preds.push(`📊 Ieviadi finanšu datus, lai JOHN varētu prognozēt kad sasniegsi sapni.`);
+  }
+  if(str>0) {
+    const next = str<7?7:str<14?14:str<30?30:str<100?100:Math.ceil(str/100)*100;
+    preds.push(`🔥 Streak ${str} dienas — vēl ${next-str} līdz milstazei <span class="gold">${next} dienas</span>!`);
+  } else {
+    preds.push(`🔥 Sāc savu pirmo streak dienu šodien — katrs lielais streak sākas ar 1.`);
+  }
+  if(S.body.sleep>0 && S.body.sleep<6.5) {
+    preds.push(`😴 Miegs ${S.body.sleep}h ir zem ieteicamā — nepietiekams miegs samazina produktivitāti par ~30%.`);
+  } else if(todayStats().total>0) {
+    const pct = Math.round(todayStats().done/todayStats().total*100);
+    preds.push(`✅ Šodienas uzdevumu izpilde: ${pct}%. ${pct>=80?'Lielisks temps, Boss!':pct>=50?'Vai vari pievienot vēl vienu uzdevumu?':'Vēl ir laiks panākt — fokusējies!'}`);
+  } else {
+    preds.push(`💡 Pievieno šodienas uzdevumus, lai JOHN varētu sekot tavam progresam.`);
+  }
+  if(preds.length===0) return `<div class="empty-state">Pievieno datus, lai JOHN varētu ģenerēt prognozes.</div>`;
+  return preds.map(p=>`<div class="pred-card">${p}</div>`).join('');
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────
+function renderDashboard() {
+  const {total,done} = todayStats();
+  const str = streak();
+  const ls = lsTotal();
+  const sav = totalBalance();
+  const dpct = S.dream.target>0 ? Math.min(100, Math.round((S.dream.current/S.dream.target)*100)) : 0;
+
+  const brief = `Šodien tev ir ${total} uzdevumi — ${done} izpildīts. Enerģija: ${S.body.energy||'—'}/10. Life Score: ${ls}/100. 🔥 Streak: ${str} dienas. <span id="brief-cal"></span>Katrs solis tuvina tevi finansiālajai brīvībai, Boss.`;
+
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">${greet()}</div>
+    <div class="sec-sub">${dateStr()}</div>
+  </div>
+
+  <div class="brief">
+    <div class="brief-body">${brief}</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-lbl">Mans balanss</div>
+      <div class="stat-val" style="color:${sav>=0?'var(--gold)':'#e05555'}">€${fmt(Math.abs(sav))}</div>
+      <div class="stat-sub">${sav>=0?'Kopējais pozitīvs balanss':'Negatīvs balanss'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-lbl">Miegs</div>
+      <div class="stat-val">${S.body.sleep||'—'}<span class="stat-unit">h</span></div>
+      <div class="stat-sub">Pēdējā nakts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-lbl">Streak</div>
+      <div class="stat-val">🔥${str}</div>
+      <div class="stat-sub">dienas pēc kārtas</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="card-title">Goals & Tasks</span></div>
+    <div class="tabs">
+      ${['today','week','month','year'].map(t=>`
+        <button class="tab${S.activeTab===t?' active':''}" onclick="switchTab('${t}')">
+          ${t==='today'?'Šodien':t==='week'?'Nedēļa':t==='month'?'Mēnesis':'Gads'}
+        </button>`).join('')}
+    </div>
+    <div id="task-area">${renderTasks()}</div>
+  </div>
+
+  ${S.dream.name && S.dream.target>0 ? `
+  <div class="dream-card">
+    <div class="card-h">
+      <span class="card-title">🌟 ${S.dream.name}</span>
+      <span class="gold fw6">${dpct}%</span>
+    </div>
+    <div class="row" style="justify-content:space-between;font-size:12px;color:var(--muted)">
+      <span>€${fmt(S.dream.current)}</span><span>€${fmt(S.dream.target)}</span>
+    </div>
+    <div class="dream-bar-track"><div class="dream-bar-fill" style="width:${dpct}%"></div></div>
+    <div class="xs" style="color:var(--muted)">${dreamYearEstimate()}</div>
+  </div>` : `
+  <div class="dream-card" style="cursor:pointer" onclick="go('settings')">
+    <div style="text-align:center;padding:8px 0;color:var(--muted);font-size:13px">
+      🌟 Nav iestatīts sapnis — <span class="gold">iestatī mērķi ⚙️</span>
+    </div>
+  </div>`}
+
+  <div class="card">
+    <div class="card-h">
+      <span class="card-title">📅 Šodien kalendārā</span>
+      <button class="btn btn-ghost btn-sm" onclick="showAddEventModal()">+ Pievienot</button>
+    </div>
+    <div id="cal-events-content"><div class="xs" style="color:var(--muted);padding:8px">Ielādē...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="card-title">🔮 JOHN Prognoze</span></div>
+    ${renderPredictions(str, sav)}
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="card-title">Garastāvoklis šodien</span></div>
+    ${renderMoodWidget()}
+  </div>`;
+}
+
+// ─── TASKS ───────────────────────────────────────────────
+function renderTasks() {
+  const list = S.tasks[S.activeTab]||[];
+  const done = list.filter(t=>t.done).length;
+  const pct = list.length ? Math.round(done/list.length*100) : 0;
+  return `
+    <div class="task-list">
+      ${list.length===0 ? '<div class="empty-state">Nav uzdevumu — pievienosi pirmo! 🎯</div>' : ''}
+      ${list.map((t,i)=>`
+        <div class="task-item">
+          <button class="task-check${t.done?' done':''}" onclick="toggleTask('${S.activeTab}',${i})">${t.done?'✓':''}</button>
+          <span class="task-txt${t.done?' done':''}">${t.text}</span>
+          ${t.dl?`<span class="task-dl">${t.dl}</span>`:''}
+        </div>`).join('')}
+    </div>
+    ${list.length>0?`
+      <div class="task-progress">
+        <div class="progress-lbl"><span>${done} no ${list.length}</span><span class="gold">${pct}%</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:${pct}%"></div></div>
+      </div>`:'' }
+    <div id="add-area">
+      ${S.addingTask ? `
+        <div class="row mt8">
+          <input type="text" id="new-task" placeholder="Uzdevuma nosaukums..." style="flex:1" onkeydown="taskKey(event)">
+          <button class="btn btn-gold btn-sm" onclick="confirmTask()">+</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelTask()">×</button>
+        </div>` : `
+        <button class="add-task-btn" onclick="startTask()">+ Pievienot uzdevumu</button>`}
+    </div>`;
+}
+
+function switchTab(t) { S.activeTab=t; S.addingTask=false; document.getElementById('task-area').innerHTML=renderTasks(); }
+function toggleTask(tab,i) {
+  S.tasks[tab][i].done=!S.tasks[tab][i].done; save('tasks');
+  const td=S.tasks.today||[]; const d=td.filter(x=>x.done).length;
+  S.ls.productivity=td.length?Math.round(d/td.length*100):50; save('ls'); renderLS();
+  document.getElementById('task-area').innerHTML=renderTasks();
+}
+function startTask() { S.addingTask=true; document.getElementById('task-area').innerHTML=renderTasks(); setTimeout(()=>document.getElementById('new-task')?.focus(),50); }
+function cancelTask() { S.addingTask=false; document.getElementById('task-area').innerHTML=renderTasks(); }
+function confirmTask() {
+  const v=document.getElementById('new-task')?.value.trim(); if(!v) return;
+  if(!S.tasks[S.activeTab]) S.tasks[S.activeTab]=[];
+  S.tasks[S.activeTab].push({text:v,done:false,dl:''}); save('tasks');
+  S.addingTask=false; document.getElementById('task-area').innerHTML=renderTasks();
+}
+function taskKey(e) { if(e.key==='Enter') confirmTask(); if(e.key==='Escape') cancelTask(); }
+
+// ─── MOOD WIDGET ─────────────────────────────────────────
+function renderMoodWidget() {
+  const MOODS=[
+    {e:'🔥',l:'Motivēts'},{e:'😴',l:'Noguris'},{e:'😌',l:'Mierīgs'},{e:'😤',l:'Stresā'},
+    {e:'🎯',l:'Fokusēts'},{e:'😊',l:'Laimīgs'},{e:'🤔',l:'Noraizējies'},{e:'💪',l:'Spēcīgs'}
+  ];
+  return `
+    <div class="mood-emojis">
+      ${MOODS.map(m=>`
+        <div class="mood-btn${S.selMoods.includes(m.l)?' selected':''}" onclick="toggleMood('${m.l}')">
+          <span class="mood-emoji">${m.e}</span>
+          <span class="mood-lbl">${m.l}</span>
+        </div>`).join('')}
+    </div>
+    <div class="xs" style="color:var(--muted);margin-bottom:7px">Enerģijas līmenis</div>
+    <div class="energy-dots">
+      ${Array.from({length:10},(_,i)=>`
+        <button class="edot${S.energy>=i+1?' active':''}" onclick="setNrg(${i+1})">${i+1}</button>`).join('')}
+    </div>
+    <textarea id="mood-notes" placeholder="Ko jūti šobrīd? JOHN klausās..." rows="3" style="margin-bottom:10px">${S.mood.notes||''}</textarea>
+    <button class="btn btn-gold" onclick="saveMood()" style="width:100%">Saglabāt</button>`;
+}
+
+function toggleMood(l) {
+  const i=S.selMoods.indexOf(l);
+  i===-1 ? S.selMoods.push(l) : S.selMoods.splice(i,1);
+  document.querySelectorAll('.mood-btn').forEach(b=>{
+    b.classList.toggle('selected', S.selMoods.includes(b.querySelector('.mood-lbl')?.textContent));
+  });
+}
+function setNrg(v) {
+  S.energy=v;
+  document.querySelectorAll('.edot').forEach((d,i)=>d.classList.toggle('active',i<v));
+}
+function saveMood() {
+  const entry={moods:[...S.selMoods],energy:S.energy,notes:document.getElementById('mood-notes')?.value||'',date:new Date().toISOString()};
+  S.mood=entry;
+  const today=new Date().toDateString();
+  const idx=S.moodLog.findIndex(e=>new Date(e.date).toDateString()===today);
+  if(idx>=0) S.moodLog[idx]=entry; else S.moodLog.push(entry);
+  S.ls.mood=Math.min(100,S.energy*10); save('mood'); save('moodLog'); save('ls');
+  S.body.energy=S.energy; save('body'); renderLS();
+  showToast('✓ Garastāvoklis saglabāts!');
+}
+
+// ─── SIDE QUESTS ─────────────────────────────────────────
+function getQuests() {
+  const stored=load('quests',[]);
+  const today=new Date().toDateString();
+  if(stored.length>0&&stored[0].date===today)return stored;
+  const pool=[
+    {t:'Izdzer 3 glāzes ūdens nākamo 30 min',d:'Hidratācija uzlabo koncentrāciju un enerģiju.',diff:'easy'},
+    {t:'Sakārto savu galdu un darba vietu',d:'Sakārtota vide = sakārtots prāts.',diff:'easy'},
+    {t:'Nosūti komplimentu 3 cilvēkiem',d:'Īsts, personīgs kompliments — ne tikai "super".',diff:'easy'},
+    {t:'Izlasi 20 lappuses grāmatas',d:'Un uzraksti JOHN journal ko iemācījies.',diff:'medium'},
+    {t:'Izskrien 5km bez apstāšanās',d:'Temps nav svarīgs — izturība ir.',diff:'medium'},
+    {t:'Uzraksti biznesa ideju ar pilnu plānu',d:'Problēma, risinājums, tirgus, pirmais solis.',diff:'medium'},
+    {t:'Visu dienu bez sociālajiem tīkliem',d:'24h bez Instagram, TikTok, Twitter.',diff:'hard'},
+    {t:'Trīs treniņi vienā dienā',d:'Rīts, pusdiena, vakars.',diff:'hard'},
+  ];
+  const q=[
+    {...pool[Math.floor(Math.random()*3)],date:today,done:false},
+    {...pool[3+Math.floor(Math.random()*3)],date:today,done:false},
+    {...pool[6+Math.floor(Math.random()*2)],date:today,done:false},
+  ];
+  localStorage.setItem('j_quests',JSON.stringify(q));return q;
+}
+
+const QUEST_BADGE={
+  easy:{lbl:'⚡ Easy',bg:'rgba(42,122,75,0.2)',col:'#4caf7a',time:'~15 min'},
+  medium:{lbl:'⚔️ Medium',bg:'rgba(42,90,154,0.2)',col:'#5b9bd5',time:'~1 stunda'},
+  hard:{lbl:'💀 Hard',bg:'rgba(138,122,42,0.2)',col:'#c9a84c',time:'visa diena'},
+  extreme:{lbl:'👹 Extreme',bg:'rgba(138,42,42,0.2)',col:'#e05555',time:'visa nedēļa'},
+};
+
+function renderSideQuests() {
+  const quests=getQuests();
+  return `
+  <input type="file" id="quest-photo-input" accept="image/*" style="display:none" onchange="handleQuestPhoto(this)">
+  <div class="sec-hdr">
+    <div class="sec-title">🗺️ Side Quests</div>
+    <div class="sec-sub">AI ģenerēti uzdevumi katru dienu</div>
+  </div>
+  <div class="row" style="margin-bottom:14px">
+    <button class="btn btn-ghost" id="quest-gen-btn" onclick="generateQuestsWithAI(true)" style="width:100%">⚡ Ģenerēt jaunus</button>
+  </div>
+  <div id="quests-container" style="display:flex;flex-direction:column;gap:12px">
+    ${quests.map((q,i)=>{
+      const b=QUEST_BADGE[q.diff]||QUEST_BADGE.easy;
+      const photo=localStorage.getItem('j_quest_photo_'+i);
+      return`<div class="card" style="border-left:3px solid ${b.col}">
+        <div class="card-h" style="margin-bottom:10px">
+          <span style="background:${b.bg};color:${b.col};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${b.lbl}</span>
+          <span class="xs" style="color:var(--muted)">${b.time}${q.ai?' · ✨ AI':''}  </span>
+        </div>
+        <div style="font-size:15px;font-weight:500;margin-bottom:6px">${q.t}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">${q.d}</div>
+        ${photo?`<div style="margin-bottom:12px"><img src="${photo}" style="width:100%;max-height:180px;object-fit:cover;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,0.06)"></div>`:''}
+        <div class="row" style="gap:8px">
+          <button class="btn ${q.done?'btn-ghost':'btn-gold'}" onclick="completeQuest(${i})" style="flex:1">${q.done?'✓ Izpildīts':'Atzīmēt kā izpildītu'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="openQuestPhoto(${i})" title="Pievienot foto">📸</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-h"><span class="card-title">📊 Statistika</span></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-lbl">Streak</div><div class="stat-val">🔥${streak()}</div><div class="stat-sub">dienas</div></div>
+      <div class="stat-card"><div class="stat-lbl">Šodien</div><div class="stat-val">${quests.filter(q=>q.done).length}/3</div><div class="stat-sub">izpildīts</div></div>
+      <div class="stat-card"><div class="stat-lbl">Kopā</div><div class="stat-val">${parseInt(localStorage.getItem('j_total_quests')||'0')}</div><div class="stat-sub">visi laiki</div></div>
+    </div>
+  </div>`;
+}
+
+function completeQuest(i) {
+  const q=load('quests',[]); q[i].done=!q[i].done;
+  localStorage.setItem('j_quests',JSON.stringify(q));
+  if(q[i].done)localStorage.setItem('j_total_quests',String(parseInt(localStorage.getItem('j_total_quests')||'0')+1));
+  renderContent();
+}
+
+function openQuestPhoto(i) {
+  const inp=document.getElementById('quest-photo-input');
+  if(!inp)return; inp._qi=i; inp.value=''; inp.click();
+}
+
+function handleQuestPhoto(input) {
+  const i=input._qi; const file=input.files?.[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{localStorage.setItem('j_quest_photo_'+i,e.target.result);renderContent();showToast('✓ Foto saglabāts!');};
+  reader.readAsDataURL(file);
+}
+
+async function generateQuestsWithAI(force) {
+  const today=new Date().toDateString();
+  const stored=load('quests',[]);
+  if(!force&&stored.length>0&&stored[0].date===today&&stored[0].ai)return;
+  const genBtn=document.getElementById('quest-gen-btn');
+  const questsEl=document.getElementById('quests-container');
+  if(genBtn){genBtn.disabled=true;genBtn.textContent='⏳ Ģenerē...';}
+  if(questsEl)questsEl.innerHTML=`<div style="text-align:center;padding:36px"><div class="typing" style="justify-content:center"><span></span><span></span><span></span></div><div class="xs" style="color:var(--muted);margin-top:12px">JOHN ģenerē tev unikālus side quests...</div></div>`;
+  const goals=(S.goals||[]).filter(g=>g.status==='Aktīvs').map(g=>g.name).slice(0,5).join(', ')||'vispārēja izaugsme';
+  const energy=S.body.energy||5;
+  try{
+    const text=await callJohnAI(`JOHN AI. Enerģija ${energy}/10, mērķi: ${goals}. Ģenerē 3 side quests šodienai. JSON tikai: {"quests":[{"t":"nosaukums lv","d":"apraksts 1 teikums","diff":"easy"},{"t":"nosaukums","d":"apraksts","diff":"medium"},{"t":"nosaukums","d":"apraksts","diff":"hard"}]}`,150);
+    const m=text.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('Nav JSON');
+    const data=JSON.parse(m[0]);
+    if(!data.quests||data.quests.length<3)throw new Error('Nepilnīga atbilde');
+    const q=data.quests.slice(0,3).map(x=>({t:x.t,d:x.d,diff:x.diff||'medium',date:today,done:false,ai:true}));
+    localStorage.setItem('j_quests',JSON.stringify(q));
+    showToast('✓ Jauni AI side quests ģenerēti!');renderContent();
+  }catch(err){
+    showToast('⚠️ '+err.message);if(questsEl)renderContent();
+  }
+  if(genBtn){genBtn.disabled=false;genBtn.textContent='⚡ Ģenerēt jaunus';}
+}
+
+function initSideQuests() {
+  const today=new Date().toDateString();
+  const stored=load('quests',[]);
+  if(stored.length===0||stored[0].date!==today||!stored[0].ai)generateQuestsWithAI(false);
+}
+
+// ─── JOURNAL ─────────────────────────────────────────────
+function renderJournal() {
+  const entries=[...S.journal].reverse();
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">📓 Journal</div>
+    <div class="sec-sub">${dateStr()}</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Jauns ieraksts</span></div>
+    <div style="display:flex;flex-direction:column;gap:0;margin-bottom:12px">
+      ${['Kas šodien izdevās?','Kas bija grūti?','Ko tu iemācījies?','Ko darīsi citādi rīt?'].map(q=>
+        `<div style="font-size:12px;color:var(--gold);padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04)">${q}</div>`
+      ).join('')}
+    </div>
+    <textarea id="j-entry" placeholder="Sāc rakstīt šeit..." rows="8" style="margin-bottom:10px"></textarea>
+    <button class="btn btn-gold" onclick="saveJournal()" style="width:100%">Saglabāt ierakstu</button>
+  </div>
+  ${entries.length>0?`
+  <div class="card">
+    <div class="card-h"><span class="card-title">Iepriekšējie ieraksti</span></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${entries.map(e=>`
+        <div style="padding:12px;background:var(--s1);border-radius:var(--r-sm)">
+          <div class="xs gold" style="margin-bottom:5px">${new Date(e.date).toLocaleDateString('lv',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">${e.text.substring(0,220)}${e.text.length>220?'...':''}</div>
+        </div>`).join('')}
+    </div>
+  </div>`:'' }`;
+}
+
+function saveJournal() {
+  const v=document.getElementById('j-entry')?.value.trim(); if(!v) return;
+  S.journal.push({text:v,date:new Date().toISOString()}); save('journal');
+  showToast('✓ Ieraksts saglabāts!'); renderContent();
+}
+
+// ─── SECOND BRAIN ────────────────────────────────────────
+function renderBrain() {
+  const notes=[...S.brain].reverse();
+  const CATS=['Bizness','Investīcijas','Personīgais','Idejas','Citāti'];
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">🧠 Second Brain</div>
+    <div class="sec-sub">Tava ideju un zināšanu krātuve</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Pievienot</span></div>
+    <div class="row" style="margin-bottom:8px">
+      <select id="b-cat" style="width:150px;flex-shrink:0">${CATS.map(c=>`<option>${c}</option>`).join('')}</select>
+      <input type="text" id="b-title" placeholder="Nosaukums..." style="flex:1">
+    </div>
+    <textarea id="b-content" placeholder="Ideja, piezīme, links, citāts..." rows="3" style="margin-bottom:8px"></textarea>
+    <button class="btn btn-gold" onclick="saveBrain()" style="width:100%">Pievienot Second Brain</button>
+  </div>
+  ${notes.length>0?`
+  <div style="display:flex;flex-direction:column;gap:10px">
+    ${notes.map(n=>`
+      <div class="card-sm">
+        <div class="row" style="margin-bottom:7px">
+          <span style="background:var(--gold-dim);color:var(--gold);font-size:10px;padding:2px 9px;border-radius:20px">${n.cat}</span>
+          <span class="xs" style="color:var(--dim)">${new Date(n.date).toLocaleDateString('lv')}</span>
+        </div>
+        <div style="font-weight:500;margin-bottom:4px">${n.title}</div>
+        <div style="font-size:13px;color:var(--muted)">${n.content}</div>
+      </div>`).join('')}
+  </div>`:'' }`;
+}
+
+function saveBrain() {
+  const title=document.getElementById('b-title')?.value.trim();
+  const content=document.getElementById('b-content')?.value.trim();
+  const cat=document.getElementById('b-cat')?.value;
+  if(!title||!content) return;
+  S.brain.push({title,content,cat,date:new Date().toISOString()}); save('brain');
+  showToast('✓ Pievienots!'); renderContent();
+}
+
+// ─── FINANCE ─────────────────────────────────────────────
+let _finType='salary';
+
+function renderFinance() {
+  const totalInc=(S.finance.income||[]).reduce((a,i)=>a+Number(i.amount),0);
+  const totalExp=(S.finance.expenses||[]).reduce((a,e)=>a+Number(e.amount),0);
+  const balance=totalInc-totalExp;
+  const allTx=[
+    ...(S.finance.income||[]).map(i=>({...i,txType:'inc',label:i.source||'Ienākums',sub:i.incomeType==='salary'?'Alga':i.incomeType==='onetime'?'Vienreizējs':'Ienākums'})),
+    ...(S.finance.expenses||[]).map(e=>({...e,txType:'exp',label:e.description||e.category||'Izdevums',sub:e.category||''}))
+  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const EXP_CATS=['Ēdiens','Transports','Izklaide','Apģērbs','Investīcijas','Dzīvoklis','Veselība','Cits'];
+  const today=new Date().toISOString().split('T')[0];
+  const formHtml=_finType==='expense'?`
+    <div class="col" style="gap:8px">
+      <input type="number" id="fin-amt" placeholder="Summa (€)" min="0" step="0.01">
+      <select id="fin-cat">${EXP_CATS.map(c=>`<option>${c}</option>`).join('')}</select>
+      <input type="text" id="fin-desc" placeholder="Apraksts (brīvprātīgs)">
+      <input type="date" id="fin-date" value="${today}" style="color-scheme:dark">
+      <button class="btn btn-gold" onclick="addFinExpense()">Pievienot izdevumu</button>
+    </div>`:`
+    <div class="col" style="gap:8px">
+      <input type="number" id="fin-amt" placeholder="Summa (€)" min="0" step="0.01">
+      <input type="text" id="fin-src" placeholder="${_finType==='salary'?'Darba devējs, uzņēmums...':'Avots (freelance, uzvara, pārdošana...)'}">
+      <input type="date" id="fin-date" value="${today}" style="color-scheme:dark">
+      <button class="btn btn-gold" onclick="addFinIncome()">Pievienot ienākumu</button>
+    </div>`;
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">💰 Finance</div>
+    <div class="sec-sub">Finanšu uzskaite</div>
+  </div>
+  <div class="inv-total" style="padding:22px">
+    <div style="font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Mans balanss</div>
+    <div style="font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:${balance>=0?'var(--gold)':'#e05555'};line-height:1;margin-bottom:16px">${balance<0?'−':''}€${fmt(Math.abs(balance).toFixed(2))}</div>
+    <div style="display:flex;justify-content:center;gap:32px">
+      <div style="text-align:center">
+        <div class="xs" style="color:var(--muted);margin-bottom:3px">Kopā ienākumi</div>
+        <div style="font-weight:600;color:#4caf7a">+€${fmt(totalInc.toFixed(2))}</div>
+      </div>
+      <div style="text-align:center">
+        <div class="xs" style="color:var(--muted);margin-bottom:3px">Kopā izdevumi</div>
+        <div style="font-weight:600;color:#e05555">−€${fmt(totalExp.toFixed(2))}</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">➕ Pievienot darījumu</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      ${[['salary','💼 Alga'],['onetime','💵 Vienreizējs'],['expense','💸 Izdevums']].map(([t,lbl])=>`<button class="btn btn-${_finType===t?'gold':'ghost'} btn-sm" onclick="setFinType('${t}')" style="flex:1">${lbl}</button>`).join('')}
+    </div>
+    ${formHtml}
+  </div>
+  ${allTx.length>0?`
+  <div class="card" style="margin-top:14px">
+    <div class="card-h"><span class="card-title">Darījumu vēsture</span></div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${allTx.slice(0,25).map(t=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--s1);border-radius:var(--r-sm);border-left:2px solid ${t.txType==='inc'?'#4caf7a':'#e05555'}">
+          <div>
+            <div style="font-size:13px;font-weight:500">${t.label}</div>
+            <div class="xs" style="color:var(--dim)">${new Date(t.date).toLocaleDateString('lv',{day:'numeric',month:'short',year:'numeric'})} ${t.sub?'· '+t.sub:''}</div>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:${t.txType==='inc'?'#4caf7a':'#e05555'}">${t.txType==='inc'?'+':'−'}€${fmt(Number(t.amount).toFixed(2))}</div>
+        </div>`).join('')}
+    </div>
+  </div>`:'' }`;
+}
+
+function setFinType(type) { _finType=type; renderContent(); }
+
+function addFinIncome() {
+  const amt=parseFloat(document.getElementById('fin-amt')?.value);
+  const src=document.getElementById('fin-src')?.value.trim()||(_finType==='salary'?'Alga':'Ienākums');
+  const date=document.getElementById('fin-date')?.value||new Date().toISOString().split('T')[0];
+  if(!amt||amt<=0)return showToast('Ievadi summu!');
+  if(!S.finance.income)S.finance.income=[];
+  S.finance.income.push({amount:amt,source:src,incomeType:_finType,date});
+  save('finance');showToast('✓ Ienākums pievienots!');renderContent();
+}
+
+function addFinExpense() {
+  const amt=parseFloat(document.getElementById('fin-amt')?.value);
+  const cat=document.getElementById('fin-cat')?.value||'Cits';
+  const desc=document.getElementById('fin-desc')?.value.trim()||'';
+  const date=document.getElementById('fin-date')?.value||new Date().toISOString().split('T')[0];
+  if(!amt||amt<=0)return showToast('Ievadi summu!');
+  if(!S.finance.expenses)S.finance.expenses=[];
+  S.finance.expenses.push({amount:amt,category:cat,description:desc,date});
+  save('finance');showToast('✓ Izdevums pievienots!');renderContent();
+}
+
+// ─── BODY ────────────────────────────────────────────────
+function renderBody() {
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">💪 Body</div>
+    <div class="sec-sub">Veselības uzskaite</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Šodienas dati</span></div>
+    <div class="grid-2">
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:7px">Enerģija (1-10)</div>
+        <div class="energy-dots" style="flex-wrap:wrap">
+          ${Array.from({length:10},(_,i)=>`<button class="edot${(S.body.energy||0)>=i+1?' active':''}" onclick="setBodyNrg(${i+1})">${i+1}</button>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:7px">Miegs (stundas)</div>
+        <input type="number" id="sleep-in" value="${S.body.sleep||''}" placeholder="7.5" min="0" max="24" step="0.5">
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:7px">Treniņš šodien?</div>
+        <div class="row">
+          <button class="btn ${S.body.workout===true?'btn-gold':'btn-ghost'} btn-sm" onclick="setWorkout(true)">✓ Jā</button>
+          <button class="btn ${S.body.workout===false?'btn-gold':'btn-ghost'} btn-sm" onclick="setWorkout(false)">✗ Nē</button>
+        </div>
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:7px">Ūdens (glāzes)</div>
+        <input type="number" id="water-in" value="${S.body.water||''}" placeholder="8" min="0" max="20">
+      </div>
+    </div>
+    ${S.body.workout?`
+    <div class="mt12">
+      <input type="text" id="workout-desc" value="${S.body.workoutDesc||''}" placeholder="Ko darīji? (5km skrējiens, spēka treniņš...)">
+    </div>`:''}
+    <div class="mt12">
+      <div class="xs" style="color:var(--muted);margin-bottom:7px">Uzturs</div>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn btn-${(S.body.nutritionMode||'manual')==='manual'?'gold':'ghost'} btn-sm" onclick="setNutritionMode('manual')">✏️ Manuāli</button>
+        <button class="btn btn-${S.body.nutritionMode==='ai'?'gold':'ghost'} btn-sm" onclick="setNutritionMode('ai')">🤖 AI Analīze</button>
+      </div>
+      ${S.body.nutritionMode==='ai'?`
+        <textarea id="nutrition-ai-input" placeholder="Uzraksti visu ko ēdi šodien — brokastis, pusdienas, vakariņas, uzkodas..." rows="3" style="margin-bottom:8px"></textarea>
+        <button class="btn btn-ghost btn-sm" id="nutri-ai-btn" onclick="analyzeNutritionAI()">🤖 Analizēt ar JOHN</button>
+        ${S.body.nutritionAIResult?`<div class="pred-card" style="margin-top:10px;border-left-color:${S.body.nutrition==='Labs'?'#4caf7a':S.body.nutrition==='Vidējs'?'var(--gold)':'#e05555'}"><div style="font-weight:600;font-size:12px;margin-bottom:4px">Vērtējums: ${S.body.nutrition||'—'}</div>${S.body.nutritionAIResult}</div>`:''}`:`
+        <div class="row">
+          ${['Labs','Vidējs','Slikts'].map(v=>`<button class="btn ${S.body.nutrition===v?'btn-gold':'btn-ghost'} btn-sm" onclick="setNutrition('${v}')">${v}</button>`).join('')}
+        </div>`}
+    </div>
+    <button class="btn btn-gold" onclick="saveBodyFull()" style="width:100%;margin-top:16px">Saglabāt</button>
+  </div>
+  ${S.body.sleep>0?`<div class="pred-card">💡 JOHN ieteikums: ${S.body.sleep<6.5?'Miegs '+S.body.sleep+'h ir zem normas — mēģini iet gulēt stundu agrāk.':S.body.sleep<7.5?'Miegs '+S.body.sleep+'h ir labs. Mēģini saglabāt šo ritmu.':'Labi dari — '+S.body.sleep+'h miegs ir ideāls, Boss!'}</div>`:''}` ;
+}
+
+function setBodyNrg(v) { S.body.energy=v; document.querySelectorAll('.edot').forEach((d,i)=>d.classList.toggle('active',i<v)); }
+function setWorkout(v) { S.body.workout=v; renderContent(); }
+function setNutrition(v) { S.body.nutrition=v; renderContent(); }
+function setNutritionMode(mode) { S.body.nutritionMode=mode; renderContent(); }
+
+async function analyzeNutritionAI() {
+  const input=document.getElementById('nutrition-ai-input')?.value.trim();
+  if(!input)return showToast('Apraksti ko ēdi šodien!');
+  const btn=document.getElementById('nutri-ai-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Analizē...';}
+  try{
+    const text=await callJohnAI(`Uztura analīze. Ēdiens: "${input}". JSON tikai: {"score":"Labs|Vidējs|Slikts","feedback":"1 teikums latviski — galvenais ieteikums."}`,150);
+    const m=text.match(/\{[\s\S]*?\}/);if(!m)throw new Error('Nav JSON');
+    const d=JSON.parse(m[0]);
+    S.body.nutrition=d.score;S.body.nutritionAIResult=d.feedback;
+    save('body');renderContent();showToast('✓ Uztura analīze gatava!');
+  }catch(err){
+    showToast('Kļūda: '+err.message);
+    if(btn){btn.disabled=false;btn.textContent='🤖 Analizēt ar JOHN';}
+  }
+}
+
+// ─── JOHN AI HELPER (web search + plain) ─────────────────
+const HAIKU='claude-haiku-4-5-20251001';
+const SONNET='claude-sonnet-4-6';
+const CACHE_TTL=6*60*60*1000; // 6 hours
+
+async function callJohnAI(prompt, maxTokens=150, useSearch=false, model=HAIKU) {
+  const body={model,max_tokens:maxTokens,messages:[{role:'user',content:prompt}]};
+  if(useSearch){body.tools=[{"type":"web_search_20250305","name":"web_search","max_uses":3}];body._beta='web-search-2025-03-05';}
+  const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API kļūda '+r.status);}
+  const data=await r.json();
+  return(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+}
+
+// ─── INVESTMENTS ─────────────────────────────────────────
+function renderInvestments() {
+  const items=S.inv.items||[];
+  const totalInvested=items.reduce((a,x)=>a+Number(x.amount),0);
+  const spCache=JSON.parse(localStorage.getItem('j_sp_cache')||'null');
+  const spFresh=spCache&&(Date.now()-spCache.ts<CACHE_TTL);
+  const advCache=JSON.parse(localStorage.getItem('j_inv_advice')||'null');
+  const advFresh=advCache&&(Date.now()-advCache.ts<CACHE_TTL);
+  const today=new Date().toISOString().split('T')[0];
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">📈 Investments</div>
+    <div class="sec-sub">Investīciju portfelis · ${new Date().toLocaleDateString('lv',{weekday:'long',day:'numeric',month:'long'})}</div>
+  </div>
+
+  <div class="inv-total">
+    <div style="font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Kopā ieguldīts</div>
+    <div style="font-family:'Syne',sans-serif;font-size:46px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:8px">€${fmt(totalInvested.toFixed(2))}</div>
+    <div class="xs" style="color:var(--dim)">${items.length} investīcij${items.length===1?'a':'as'} portfelī</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="card-title">➕ Pievienot investīciju</span></div>
+    <div class="col" style="gap:8px">
+      <input type="text" id="inv-name" placeholder="Ko ieguldīji? (zelts, S&P500, krypto, nekustamais...)">
+      <input type="number" id="inv-amt" placeholder="Summa (€)" min="0" step="0.01">
+      <input type="date" id="inv-date" value="${today}" style="color-scheme:dark">
+      <input type="text" id="inv-notes" placeholder="Piezīmes (brīvprātīgs)">
+      <button class="btn btn-gold" onclick="addInvestment()">Pievienot investīciju</button>
+    </div>
+  </div>
+
+  ${items.length>0?`
+  <div class="card">
+    <div class="card-h"><span class="card-title">📋 Manas investīcijas</span></div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${[...items].reverse().map((item,ri)=>{
+        const realIdx=items.length-1-ri;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--s1);border-radius:var(--r-sm);border-left:2px solid var(--gold-line)">
+          <div>
+            <div style="font-size:13px;font-weight:600">${item.name}</div>
+            <div class="xs" style="color:var(--dim)">${new Date(item.date).toLocaleDateString('lv',{day:'numeric',month:'short',year:'numeric'})}${item.notes?' · '+item.notes:''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="fw6 gold" style="font-size:15px">€${fmt(Number(item.amount).toFixed(2))}</div>
+            <button onclick="deleteInvestment(${realIdx})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:4px">✕</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`:''}
+
+  <div class="grid-2" style="margin-top:14px">
+    <div class="card">
+      <div class="card-h">
+        <span class="card-title">📊 S&P 500</span>
+        <button class="btn btn-ghost btn-sm" onclick="fetchSPAnalysis()" id="sp-btn">🔄 AI analīze</button>
+      </div>
+      <div id="sp-content">
+        ${spFresh?renderSPCard(spCache):`
+        <div style="text-align:center;padding:22px 0">
+          <div style="font-size:38px;margin-bottom:10px;opacity:.3">📊</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Nospied "AI analīze"</div>
+          <div class="xs" style="color:var(--dim)">JOHN pārbaudīs aktuālo S&P 500 cenu un tirgus komentāru</div>
+        </div>`}
+      </div>
+    </div>
+    <div class="card" style="background:linear-gradient(135deg,#111111,#0f1108)">
+      <div class="card-h">
+        <span class="card-title">🤖 JOHN Padomnieks</span>
+        <button class="btn btn-ghost btn-sm" onclick="fetchInvestmentAdvice()" id="adv-btn">Analizēt</button>
+      </div>
+      <div id="adv-content">
+        ${advFresh?`
+          <div class="pred-card" style="border-left-color:#4caf7a;font-size:13px;line-height:1.7">${advCache.advice}</div>
+          <div class="xs" style="color:var(--dim);text-align:right;margin-top:6px">Atjaunots: ${new Date(advCache.ts).toLocaleTimeString('lv',{hour:'2-digit',minute:'2-digit'})}</div>
+        `:`<div style="text-align:center;padding:18px;color:var(--muted);font-size:13px;line-height:1.6">JOHN analizēs tavu portfeli ar aktuālo tirgus situāciju un dos konkrētus ieteikumus.</div>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+function addInvestment() {
+  const name=document.getElementById('inv-name')?.value.trim();
+  const amount=parseFloat(document.getElementById('inv-amt')?.value);
+  const date=document.getElementById('inv-date')?.value||new Date().toISOString().split('T')[0];
+  const notes=document.getElementById('inv-notes')?.value.trim()||'';
+  if(!name||!amount||amount<=0)return showToast('Ievadi nosaukumu un summu!');
+  if(!S.inv.items)S.inv.items=[];
+  S.inv.items.push({name,amount,date,notes});
+  save('inv');showToast('✓ Investīcija pievienota!');renderContent();
+}
+
+function deleteInvestment(i){if(!confirm('Dzēst šo investīciju?'))return;S.inv.items.splice(i,1);save('inv');renderContent();}
+
+function renderSPCard(c) {
+  const up=(c.trend==='up')||(c.change||'').startsWith('+');
+  return `
+  <div style="text-align:center;padding:10px 0 16px">
+    <div style="font-family:'Syne',sans-serif;font-size:40px;font-weight:800;color:var(--text);line-height:1">${c.price||'—'}</div>
+    <div style="font-size:15px;color:${up?'#4caf7a':'#e05555'};margin-top:6px;font-weight:600">${up?'▲':'▼'} ${c.change||''} (${c.changePercent||''})</div>
+    <div class="xs" style="color:var(--dim);margin-top:4px">Atjaunots ${new Date(c.ts).toLocaleTimeString('lv',{hour:'2-digit',minute:'2-digit'})}</div>
+  </div>
+  <div style="padding:12px 14px;background:var(--s1);border-radius:var(--r-sm);font-size:13px;color:var(--muted);line-height:1.65">${c.analysis||''}</div>`;
+}
+
+async function fetchSPAnalysis() {
+  const btn=document.getElementById('sp-btn'),cont=document.getElementById('sp-content');
+  if(btn)btn.textContent='⏳ Meklē...';
+  if(cont)cont.innerHTML=`<div style="text-align:center;padding:24px"><div class="typing" style="justify-content:center"><span></span><span></span><span></span></div><div class="xs" style="color:var(--muted);margin-top:8px">Meklē aktuālo S&P 500 cenu...</div></div>`;
+  try{
+    const today=new Date().toLocaleDateString('lv');
+    const text=await callJohnAI(`S&P 500 cena šodien ${today}. JSON tikai: {"price":"XXXX","change":"+X.XX","changePercent":"+X.X%","trend":"up","analysis":"1 teikums lv."}`,150,true);
+    const m=text.match(/\{[\s\S]*?\}/);
+    if(!m)throw new Error('Neizdevās parsēt atbildi');
+    const d=JSON.parse(m[0]);d.ts=Date.now();
+    localStorage.setItem('j_sp_cache',JSON.stringify(d));
+    if(cont)cont.innerHTML=renderSPCard(d);
+  }catch(e){
+    if(cont)cont.innerHTML=`<div class="pred-card" style="color:#e05555">⚠️ ${e.message}</div>`;
+  }
+  if(btn)btn.textContent='🔄 AI analīze';
+}
+
+async function fetchInvestmentAdvice() {
+  const btn=document.getElementById('adv-btn'),cont=document.getElementById('adv-content');
+  if(btn)btn.textContent='⏳ Analizē...';
+  if(cont)cont.innerHTML=`<div style="text-align:center;padding:24px"><div class="typing" style="justify-content:center"><span></span><span></span><span></span></div><div class="xs" style="color:var(--muted);margin-top:8px">Analizē portfeli un tirgu...</div></div>`;
+  const items=S.inv.items||[];
+  const total=items.reduce((a,x)=>a+Number(x.amount),0);
+  const itemsList=items.map(x=>`${x.name} €${fmt(x.amount)}`).join(', ')||'nav ierakstu';
+  try{
+    const text=await callJohnAI(`Portfelis: ${itemsList}. €${fmt(total.toFixed(0))} kopā. Tirgus šodien + ieteikums. JSON tikai: {"advice":"2 teikumi lv — tirgus un ieteikums."}`,150,true);
+    const m=text.match(/\{[\s\S]*?\}/);
+    if(!m)throw new Error('Neizdevās parsēt atbildi');
+    const d=JSON.parse(m[0]);
+    const cache={advice:d.advice,ts:Date.now()};
+    localStorage.setItem('j_inv_advice',JSON.stringify(cache));
+    if(cont)cont.innerHTML=`<div class="pred-card" style="border-left-color:#4caf7a;font-size:13px;line-height:1.7">${d.advice}</div><div class="xs" style="color:var(--dim);text-align:right;margin-top:6px">Atjaunots ${new Date().toLocaleTimeString('lv',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  }catch(e){
+    if(cont)cont.innerHTML=`<div class="pred-card" style="color:#e05555">⚠️ ${e.message}</div>`;
+  }
+  if(btn)btn.textContent='Analizēt';
+}
+
+
+// ─── SETTINGS ────────────────────────────────────────────
+function renderSettings() {
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">⚙️ Settings</div>
+    <div class="sec-sub">JOHN konfigurācija</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Mērķi & Sapnis</span></div>
+    <div class="col">
+      <div><div class="xs" style="color:var(--muted);margin-bottom:5px">Sapnis</div><input type="text" id="set-dream" value="${S.dream.name}"></div>
+      <div><div class="xs" style="color:var(--muted);margin-bottom:5px">Mērķa summa (€)</div><input type="number" id="set-target" value="${S.dream.target}"></div>
+      <div><div class="xs" style="color:var(--muted);margin-bottom:5px">Pašreizējā summa (€)</div><input type="number" id="set-current" value="${S.dream.current}"></div>
+      <button class="btn btn-gold" onclick="saveDream()">Saglabāt</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Streak</span></div>
+    <input type="number" id="set-streak" value="${streak()}" style="margin-bottom:10px">
+    <button class="btn btn-gold" onclick="saveStreak()" style="width:100%">Saglabāt streak</button>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">📅 Google Calendar</span></div>
+    <div id="gcal-settings-content"><div class="xs" style="color:var(--muted)">Ielādē...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title" style="color:#e05555">Bīstamā zona</span></div>
+    <button class="btn btn-ghost" onclick="nuke()" style="width:100%;color:#e05555">🗑️ Dzēst visus JOHN datus</button>
+  </div>`;
+}
+
+function saveDream() {
+  S.dream.name=document.getElementById('set-dream')?.value||S.dream.name;
+  S.dream.target=parseFloat(document.getElementById('set-target')?.value)||S.dream.target;
+  S.dream.current=parseFloat(document.getElementById('set-current')?.value)||S.dream.current;
+  save('dream'); showToast('✓ Mērķi saglabāti!'); renderContent();
+}
+function saveStreak() {
+  localStorage.setItem('j_streak',document.getElementById('set-streak')?.value||'0');
+  showToast('✓ Streak saglabāts!');
+}
+function nuke() {
+  if(confirm('DZĒST VISUS JOHN DATUS? Šo nevar atsaukt!')) {
+    Object.keys(localStorage).filter(k=>k.startsWith('j_')||k.startsWith('john_')).forEach(k=>localStorage.removeItem(k));
+    location.reload();
+  }
+}
+
+// ─── GOALS ───────────────────────────────────────────────
+let goalsFilter='Visi';
+let _selGoalCat='Personīgais', _selGoalDeadline='';
+const GOAL_STATUS={Aktīvs:['rgba(201,168,76,0.12)','var(--gold)'],Pabeigts:['rgba(42,122,75,0.15)','#4caf7a'],Atlikts:['rgba(80,80,80,0.15)','var(--muted)']};
+const GOAL_CAT_COLORS={Veselība:'#4caf7a',Finanses:'#c9a84c',Bizness:'#5b9bd5',Personīgais:'#9b7fd4',Izglītība:'#e07b5b'};
+
+function renderGoals() {
+  const all=[...S.goals].reverse();
+  const filtered=goalsFilter==='Visi'?all:all.filter(g=>g.status===goalsFilter);
+  const counts={Aktīvs:S.goals.filter(g=>g.status==='Aktīvs').length,Pabeigts:S.goals.filter(g=>g.status==='Pabeigts').length,Atlikts:S.goals.filter(g=>g.status==='Atlikts').length};
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">🎯 Goals</div>
+    <div class="sec-sub">Lielākie dzīves mērķi — ne ikdienas uzdevumi</div>
+  </div>
+  <div class="row" style="margin-bottom:14px">
+    <button class="btn btn-gold" onclick="showAddGoalModal()" style="width:100%">+ Pievienot jaunu mērķi</button>
+  </div>
+  <div class="row" style="gap:6px;margin-bottom:14px;flex-wrap:wrap">
+    ${['Visi','Aktīvs','Pabeigts','Atlikts'].map(f=>`<button class="btn btn-${goalsFilter===f?'gold':'ghost'} btn-sm" onclick="setGoalsFilter('${f}')">${f}${f!=='Visi'?' ('+counts[f]+')':' ('+S.goals.length+')'}</button>`).join('')}
+  </div>
+  ${filtered.length===0?'<div class="empty-state" style="padding:40px">Nav mērķu. Pievieno savu pirmo lielo mērķi! 🎯</div>':''}
+  <div style="display:flex;flex-direction:column;gap:10px">
+    ${filtered.map((g)=>{
+      const realIdx=S.goals.findIndex(x=>x===g||(x.created===g.created&&x.name===g.name));
+      const sc=GOAL_STATUS[g.status||'Aktīvs']||GOAL_STATUS['Aktīvs'];
+      const catCol=GOAL_CAT_COLORS[g.cat]||'var(--muted)';
+      const overdue=g.date&&new Date(g.date)<new Date()&&g.status!=='Pabeigts';
+      return `<div class="card" style="border-left:3px solid ${sc[1]}">
+        <div class="card-h" style="margin-bottom:10px">
+          <div class="row" style="gap:7px;flex-wrap:wrap">
+            <span style="background:${sc[0]};color:${sc[1]};font-size:10px;padding:3px 10px;border-radius:20px;font-weight:600">${g.status||'Aktīvs'}</span>
+            <span style="background:${catCol}22;color:${catCol};font-size:10px;padding:3px 10px;border-radius:20px;font-weight:500">${g.cat||'Cits'}</span>
+          </div>
+          <div class="row" style="gap:8px">
+            ${g.date?`<span class="xs" style="color:${overdue?'#e05555':'var(--dim)'}">${overdue?'⚠️ ':''} ${new Date(g.date).toLocaleDateString('lv')}</span>`:''}
+            <button onclick="deleteGoal(${realIdx})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;line-height:1">✕</button>
+          </div>
+        </div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">${g.name}</div>
+        ${g.desc?`<div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6;border-left:2px solid rgba(255,255,255,0.07);padding-left:10px">${g.desc}</div>`:''}
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          ${['Aktīvs','Pabeigts','Atlikts'].map(s=>{
+            const active=(g.status||'Aktīvs')===s;
+            const sSC=GOAL_STATUS[s];
+            return `<button onclick="setGoalStatus(${realIdx},'${s}')" style="padding:5px 14px;border-radius:20px;border:1.5px solid ${active?sSC[1]:'rgba(255,255,255,0.08)'};background:${active?sSC[0]:'transparent'};color:${active?sSC[1]:'var(--muted)'};font-size:11px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">${s==='Pabeigts'?'✓ Pabeigts':s==='Atlikts'?'⏸ Atlikts':'▶ Aktīvs'}</button>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function showAddGoalModal() {
+  const ov=document.createElement('div');ov.className='overlay';ov.id='add-goal-ov';
+  ov.innerHTML=`<div class="modal" style="width:460px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title">🎯 Jauns mērķis</div>
+    <div class="col" style="gap:14px">
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:6px">Mērķa nosaukums *</div>
+        <input type="text" id="gm-name" placeholder="Ko tu gribi sasniegt?">
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:6px">Kāpēc šis mērķis ir svarīgs?</div>
+        <textarea id="gm-why" placeholder="Motivācija, iemesls, kā tas mainīs tavu dzīvi..." rows="3"></textarea>
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:8px">Kategorija</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${Object.entries(GOAL_CAT_COLORS).map(([name,col])=>`<button id="gcat-${name}" onclick="selectGoalCat('${name}')" style="padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.08);background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;font-family:Inter,sans-serif;transition:all .15s">${name}</button>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:8px">Termiņš</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          ${[['today','Šodien'],['week','Šī nedēļa'],['month','Šis mēnesis'],['year','Šis gads'],['custom','Pielāgots']].map(([id,lbl])=>`<button id="gdl-${id}" class="btn btn-ghost btn-sm" onclick="selectGoalDeadline('${id}')">${lbl}</button>`).join('')}
+        </div>
+        <div id="gm-custom-date" style="display:none">
+          <input type="date" id="gm-date" style="color-scheme:dark">
+        </div>
+      </div>
+      <div class="row" style="gap:8px;margin-top:4px">
+        <button class="btn btn-ghost" onclick="closeAddGoalModal()" style="flex:1">Atcelt</button>
+        <button class="btn btn-gold" onclick="submitAddGoal()" style="flex:1">Pievienot mērķi ✓</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  _selGoalCat='Personīgais';_selGoalDeadline='';
+  setTimeout(()=>{selectGoalCat('Personīgais');document.getElementById('gm-name')?.focus();},30);
+}
+
+function selectGoalCat(cat) {
+  _selGoalCat=cat;
+  Object.entries(GOAL_CAT_COLORS).forEach(([name,col])=>{
+    const btn=document.getElementById('gcat-'+name);if(!btn)return;
+    if(name===cat){btn.style.borderColor=col;btn.style.background=col+'22';btn.style.color=col;}
+    else{btn.style.borderColor='rgba(255,255,255,0.08)';btn.style.background='transparent';btn.style.color='var(--muted)';}
+  });
+}
+
+function selectGoalDeadline(type) {
+  _selGoalDeadline=type;
+  ['today','week','month','year','custom'].forEach(d=>{
+    const btn=document.getElementById('gdl-'+d);if(!btn)return;
+    btn.className='btn btn-'+(d===type?'gold':'ghost')+' btn-sm';
+  });
+  const cd=document.getElementById('gm-custom-date');if(cd)cd.style.display=type==='custom'?'block':'none';
+}
+
+function getGoalDeadlineDate() {
+  const now=new Date();
+  if(_selGoalDeadline==='today')return now.toISOString().split('T')[0];
+  if(_selGoalDeadline==='week'){const d=new Date(now);d.setDate(d.getDate()+7);return d.toISOString().split('T')[0];}
+  if(_selGoalDeadline==='month')return new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().split('T')[0];
+  if(_selGoalDeadline==='year')return `${now.getFullYear()}-12-31`;
+  if(_selGoalDeadline==='custom')return document.getElementById('gm-date')?.value||'';
+  return '';
+}
+
+function closeAddGoalModal(){document.getElementById('add-goal-ov')?.remove();}
+
+function submitAddGoal(){
+  const name=document.getElementById('gm-name')?.value.trim();
+  if(!name){showToast('Ievadi mērķa nosaukumu!');return;}
+  S.goals.push({name,desc:document.getElementById('gm-why')?.value.trim()||'',cat:_selGoalCat,date:getGoalDeadlineDate(),status:'Aktīvs',created:new Date().toISOString()});
+  save('goals');closeAddGoalModal();showToast('✓ Mērķis pievienots!');renderContent();
+}
+
+function setGoalStatus(i,s){S.goals[i].status=s;save('goals');renderContent();}
+function setGoalsFilter(f){goalsFilter=f;renderContent();}
+function deleteGoal(i){if(!confirm('Dzēst šo mērķi?'))return;S.goals.splice(i,1);save('goals');renderContent();}
+
+// ─── MOOD FULL PAGE ──────────────────────────────────────
+const MOOD_MAP={Motivēts:'🔥',Noguris:'😴',Mierīgs:'😌',Stresā:'😤',Fokusēts:'🎯',Laimīgs:'😊',Noraizējies:'🤔',Spēcīgs:'💪'};
+
+function renderMoodPage() {
+  const recent=[...S.moodLog].reverse().slice(0,30);
+  const today=new Date().toDateString();
+  const todayEntry=S.moodLog.find(e=>new Date(e.date).toDateString()===today);
+  const avgEnergy=S.moodLog.length?Math.round(S.moodLog.slice(-7).reduce((a,e)=>a+(e.energy||0),0)/Math.min(7,S.moodLog.length)*10)/10:0;
+  const topMood=S.moodLog.length?(()=>{const cnt={};S.moodLog.slice(-14).forEach(e=>(e.moods||[]).forEach(m=>{cnt[m]=(cnt[m]||0)+1;}));return Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';})():'—';
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">😊 Mood</div>
+    <div class="sec-sub">Garastāvokļa uzskaite un tendences</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-lbl">Vidējā enerģija (7d)</div><div class="stat-val">${avgEnergy||'—'}<span class="stat-unit">/10</span></div></div>
+    <div class="stat-card"><div class="stat-lbl">Biežākais mood (14d)</div><div class="stat-val" style="font-size:18px">${topMood!=='—'?(MOOD_MAP[topMood]||'')+'  ':''}<span style="font-size:14px">${topMood}</span></div></div>
+    <div class="stat-card"><div class="stat-lbl">Ierakstu skaits</div><div class="stat-val">${S.moodLog.length}</div></div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">${todayEntry?'✓ Šodien saglabāts — labot':'Šodienas garastāvoklis'}</span></div>
+    ${renderMoodWidget()}
+  </div>
+  ${S.moodLog.length>0?`
+  <div class="card">
+    <div class="card-h"><span class="card-title">Pēdējo 14 dienu tendence</span></div>
+    <div style="display:flex;gap:6px;align-items:flex-end;height:60px;margin-bottom:8px">
+      ${[...S.moodLog].slice(-14).map(e=>{
+        const h=Math.round((e.energy||0)/10*52);
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <div title="${(e.moods||[]).join(', ')}" style="width:100%;height:${h}px;background:var(--gold);border-radius:3px 3px 0 0;opacity:${0.4+h/80};min-height:3px"></div>
+          <span style="font-size:9px;color:var(--dim)">${new Date(e.date).getDate()}.${new Date(e.date).getMonth()+1}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="xs" style="color:var(--dim);text-align:center">Enerģijas līmenis pa dienām (augstāks = labāk)</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Garastāvokļa vēsture</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${recent.map(e=>`
+        <div style="padding:11px 14px;background:var(--s1);border-radius:var(--r-sm)">
+          <div class="row" style="justify-content:space-between;margin-bottom:5px">
+            <div class="row" style="gap:6px">
+              <span style="font-size:16px">${(e.moods||[]).map(m=>MOOD_MAP[m]||'').join('')||'—'}</span>
+              <span style="font-size:12px;color:var(--muted)">${(e.moods||[]).join(', ')||'Nav norādīts'}</span>
+            </div>
+            <div class="row" style="gap:10px">
+              <span class="xs" style="color:var(--gold)">⚡${e.energy||0}/10</span>
+              <span class="xs" style="color:var(--dim)">${new Date(e.date).toLocaleDateString('lv',{weekday:'short',day:'numeric',month:'short'})}</span>
+            </div>
+          </div>
+          ${e.notes?`<div style="font-size:12px;color:var(--muted);font-style:italic">"${e.notes}"</div>`:''}
+        </div>`).join('')}
+    </div>
+  </div>`:''}`
+}
+
+// ─── BODY ENHANCED ───────────────────────────────────────
+function renderBodyHistory() {
+  const log=load('bodyLog',[]);
+  if(!log.length) return '';
+  const last7=[...log].slice(-7).reverse();
+  return `
+  <div class="card">
+    <div class="card-h"><span class="card-title">📊 Pēdējās 7 dienas</span></div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr>${['Datums','Miegs','Enerģija','Ūdens','Treniņš','Uzturs'].map(h=>`<th style="text-align:left;padding:6px 10px;color:var(--muted);font-weight:500;border-bottom:1px solid rgba(255,255,255,0.05)">${h}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${last7.map(d=>`<tr>
+            <td style="padding:8px 10px;color:var(--dim);border-bottom:1px solid rgba(255,255,255,0.03)">${new Date(d.date).toLocaleDateString('lv',{weekday:'short',day:'numeric',month:'short'})}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.03);color:${d.sleep>=7?'#4caf7a':d.sleep>=6?'var(--gold)':'#e05555'}">${d.sleep||'—'}h</td>
+            <td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.03)">${d.energy||'—'}/10</td>
+            <td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.03)">${d.water||'—'} gl.</td>
+            <td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.03)">${d.workout?'✓':'—'}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.03);color:${d.nutrition==='Labs'?'#4caf7a':d.nutrition==='Vidējs'?'var(--gold)':'var(--muted)'}">${d.nutrition||'—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function saveBodyFull() {
+  S.body.sleep=parseFloat(document.getElementById('sleep-in')?.value)||0;
+  S.body.water=parseInt(document.getElementById('water-in')?.value)||0;
+  if(S.body.workout&&document.getElementById('workout-desc'))S.body.workoutDesc=document.getElementById('workout-desc').value;
+  S.ls.sleep=Math.min(100,Math.round((S.body.sleep/8)*100));
+  S.ls.health=Math.min(100,Math.round((S.body.water/8)*25+(S.body.workout?45:0)+(S.body.nutrition==='Labs'?30:S.body.nutrition==='Vidējs'?15:0)));
+  save('body');save('ls');renderLS();
+  const log=load('bodyLog',[]);
+  const today=new Date().toDateString();
+  const idx=log.findIndex(e=>new Date(e.date).toDateString()===today);
+  const entry={...S.body,date:new Date().toISOString()};
+  if(idx>=0)log[idx]=entry;else log.push(entry);
+  localStorage.setItem('j_bodyLog',JSON.stringify(log));
+  showToast('✓ Saglabāts!');renderContent();
+}
+
+// ─── SECOND BRAIN ENHANCED ───────────────────────────────
+let brainSearch='';
+let brainCat='Visi';
+const BRAIN_CATS=['Bizness','Investīcijas','Personīgais','Idejas','Citāti','Tehnoloģijas','Cits'];
+
+function renderBrain() {
+  const q=brainSearch.toLowerCase();
+  const all=[...S.brain].reverse();
+  const filtered=all.filter(n=>(brainCat==='Visi'||n.cat===brainCat)&&(!q||n.title.toLowerCase().includes(q)||n.content.toLowerCase().includes(q)));
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">🧠 Second Brain</div>
+    <div class="sec-sub">Idejas, piezīmes, citāti, links — viss vienā vietā</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Pievienot</span></div>
+    <div class="col">
+      <div class="row"><select id="b-cat" style="width:160px;flex-shrink:0">${BRAIN_CATS.map(c=>`<option>${c}</option>`).join('')}</select><input type="text" id="b-title" placeholder="Nosaukums..." style="flex:1"></div>
+      <textarea id="b-content" placeholder="Ideja, piezīme, links, citāts..." rows="3"></textarea>
+      <button class="btn btn-gold" onclick="saveBrain()">Pievienot Second Brain</button>
+    </div>
+  </div>
+  <div class="row" style="gap:8px;margin-bottom:10px">
+    <input type="text" id="brain-search" placeholder="🔍 Meklēt..." value="${brainSearch}" oninput="brainSearch=this.value;renderContent()" style="flex:1">
+  </div>
+  <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    ${['Visi',...BRAIN_CATS].map(c=>`<button class="btn btn-${brainCat===c?'gold':'ghost'} btn-sm" onclick="brainCat='${c}';renderContent()">${c}</button>`).join('')}
+  </div>
+  ${filtered.length===0?`<div class="empty-state">${S.brain.length===0?'Nav ierakstu. Pievieno pirmo ideju! 🧠':'Nav rezultātu šim meklējumam.'}</div>`:''}
+  <div style="display:grid;gap:10px">
+    ${filtered.map((n)=>{
+      const realIdx=S.brain.findIndex(x=>x.date===n.date&&x.title===n.title);
+      return `<div class="card-sm" style="border-left:3px solid var(--gold-line)">
+        <div class="row" style="justify-content:space-between;margin-bottom:7px">
+          <div class="row" style="gap:6px">
+            <span style="background:var(--gold-dim);color:var(--gold);font-size:10px;padding:2px 9px;border-radius:20px">${n.cat}</span>
+            <span class="xs" style="color:var(--dim)">${new Date(n.date).toLocaleDateString('lv')}</span>
+          </div>
+          <button onclick="deleteBrain(${realIdx})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">✕</button>
+        </div>
+        <div style="font-weight:500;margin-bottom:5px">${n.title}</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.55">${n.content}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+function saveBrain(){const t=document.getElementById('b-title')?.value.trim(),c=document.getElementById('b-content')?.value.trim();if(!t||!c)return;S.brain.push({title:t,content:c,cat:document.getElementById('b-cat')?.value||'Cits',date:new Date().toISOString()});save('brain');showToast('✓ Pievienots!');renderContent();}
+function deleteBrain(i){if(!confirm('Dzēst šo ierakstu?'))return;S.brain.splice(i,1);save('brain');renderContent();}
+
+// ─── NEWS ────────────────────────────────────────────────
+let newsFilter='Visi';
+const NEWS_COLORS={Politika:'#e05555',Ekonomika:'#4caf7a',Tehnoloģijas:'#5b9bd5',AI:'#c9a84c',Sports:'#e07a35','Pašattīstība':'#9b7de0'};
+const NEWS_EMOJI={Politika:'🏛️',Ekonomika:'📊',Tehnoloģijas:'💻',AI:'🤖',Sports:'⚽','Pašattīstība':'🧠'};
+
+function renderNews() {
+  const cache=JSON.parse(localStorage.getItem('j_news_cache')||'null');
+  const articles=cache?cache.articles:[];
+  const ageMin=cache?Math.round((Date.now()-cache.ts)/60000):null;
+  const stale=cache&&(Date.now()-cache.ts>CACHE_TTL);
+  const filtered=newsFilter==='Visi'?articles:articles.filter(a=>a.cat===newsFilter);
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">🌍 JOHN News Briefing</div>
+    <div class="sec-sub">${cache?`Atjaunots pirms ${ageMin} min · ${articles.length} ziņas${stale?' · <span style="color:var(--gold)">nospied Atjaunot</span>':''}` :'Nospied pogu lai ielādētu ziņas'}</div>
+  </div>
+
+  <div style="background:linear-gradient(135deg,#111111,#12100e);border-radius:var(--r);border-top:2px solid var(--gold-line);padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">JOHN meklē aktuālās ziņas no interneta</div>
+      <div class="xs" style="color:var(--muted)">Politika · Ekonomika · Tehnoloģijas · AI · Sports · Pašattīstība</div>
+    </div>
+    <button class="btn btn-gold" onclick="fetchJohnNews()" id="news-btn" style="flex-shrink:0;padding:10px 20px;font-size:13px">
+      ${articles.length>0?'🔄 Atjaunot':'⚡ Ielādēt ziņas'}
+    </button>
+  </div>
+
+  ${articles.length>0?`
+  <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="btn btn-${newsFilter==='Visi'?'gold':'ghost'} btn-sm" onclick="newsFilter='Visi';renderContent()">Visi (${articles.length})</button>
+    ${Object.keys(NEWS_COLORS).map(c=>{const n=articles.filter(a=>a.cat===c).length;return n?`<button class="btn btn-${newsFilter===c?'gold':'ghost'} btn-sm" onclick="newsFilter='${c}';renderContent()">${NEWS_EMOJI[c]||''} ${c} (${n})</button>`:''}).join('')}
+  </div>`:''}
+
+  <div id="news-feed">
+    ${articles.length===0?`
+    <div style="text-align:center;padding:70px 20px">
+      <div style="font-size:56px;margin-bottom:16px;opacity:.2">🌍</div>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;color:var(--muted);margin-bottom:8px">Nav ziņu</div>
+      <div class="xs" style="color:var(--dim);max-width:280px;margin:0 auto;line-height:1.6">Nospied "Ielādēt ziņas" un JOHN automātiski atradīs un apkopos šodienas svarīgākās ziņas</div>
+    </div>`:renderNewsCards(filtered)}
+  </div>`;
+}
+
+function renderNewsCards(articles) {
+  if(!articles||!articles.length) return '<div class="empty-state">Nav ziņu šajā kategorijā.</div>';
+  return `<div style="display:flex;flex-direction:column;gap:12px">
+    ${articles.map(a=>{
+      const col=NEWS_COLORS[a.cat]||'var(--gold)';
+      const em=NEWS_EMOJI[a.cat]||'📰';
+      return `<div class="news-card" style="border-top:2px solid ${col}">
+        <div class="news-glow" style="background:radial-gradient(circle at top right,${col}08,transparent 70%)"></div>
+        <div class="row" style="justify-content:space-between;margin-bottom:11px">
+          <div class="row" style="gap:8px">
+            <span style="font-size:15px">${em}</span>
+            <span style="background:${col}20;color:${col};font-size:10px;padding:2px 10px;border-radius:20px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">${a.cat}</span>
+            ${a.source?`<span class="xs" style="color:var(--muted)">· ${a.source}</span>`:''}
+          </div>
+          ${a.time?`<span class="xs" style="color:var(--dim);flex-shrink:0">${a.time}</span>`:''}
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:15.5px;font-weight:600;line-height:1.45;margin-bottom:10px;color:var(--text)">${a.headline}</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;padding-top:10px;border-top:1px solid rgba(255,255,255,0.04)">${a.summary}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+async function fetchJohnNews() {
+  const btn=document.getElementById('news-btn'),feed=document.getElementById('news-feed');
+  if(btn){btn.textContent='⏳ Meklē...';btn.disabled=true;}
+  if(feed)feed.innerHTML=`<div style="display:flex;flex-direction:column;gap:12px">
+    ${Array(3).fill(0).map(()=>`<div style="background:var(--s2);border-radius:var(--r);border-top:2px solid rgba(255,255,255,0.05);padding:18px 20px">
+      <div class="shimmer" style="height:10px;width:25%;margin-bottom:12px"></div>
+      <div class="shimmer" style="height:17px;width:88%;margin-bottom:8px"></div>
+      <div class="shimmer" style="height:13px;width:70%;margin-bottom:6px"></div>
+    </div>`).join('')}
+  </div>`;
+  try{
+    const today=new Date().toLocaleDateString('lv',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const text=await callJohnAI(
+      `Šodien ir ${today}. Meklē 3 svarīgākās ziņas no pēdējām 24 stundām (dažādas tēmas). JSON tikai: [{"cat":"Kategorija","headline":"Virsraksts","source":"Avots","summary":"1 teikums lv.","time":"pirms X st."},...]`,
+      500,true,SONNET
+    );
+    const m=text.match(/\[[\s\S]*\]/);
+    if(!m)throw new Error('Neizdevās iegūt ziņas no AI atbildes');
+    const arts=JSON.parse(m[0]);
+    if(!Array.isArray(arts)||!arts.length)throw new Error('Nav ziņu masīvā');
+    localStorage.setItem('j_news_cache',JSON.stringify({articles:arts,ts:Date.now()}));
+    if(feed)feed.innerHTML=renderNewsCards(newsFilter==='Visi'?arts:arts.filter(a=>a.cat===newsFilter));
+    renderContent();
+  }catch(e){
+    if(feed)feed.innerHTML=`<div style="text-align:center;padding:30px">
+      <div style="color:#e05555;margin-bottom:8px;font-size:14px">⚠️ ${e.message}</div>
+      <div class="xs" style="color:var(--dim)">Pārbaudi vai API atslēga ir pareiza (⚙️ Settings) un mēģini vēlreiz.</div>
+    </div>`;
+  }
+  if(btn){btn.textContent='🔄 Atjaunot';btn.disabled=false;}
+}
+
+// ─── IDEAS ───────────────────────────────────────────────
+const IDEA_CATS=['Bizness','Produkts','Investīcijas','Personīgais','Tehnoloģijas','Cits'];
+const IDEA_STATUS=['Jauna','Attīstīšanā','Realizēta','Atmesta'];
+const IDEA_PRIORITY={Augsta:'#e05555',Vidēja:'var(--gold)',Zema:'var(--muted)'};
+
+function renderIdeas() {
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">💡 Ideas</div>
+    <div class="sec-sub">Uztver idejas uzreiz — pirms tās pazūd</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">⚡ Ātrā ideja</span></div>
+    <div class="col">
+      <input type="text" id="i-title" placeholder="Idejas nosaukums...">
+      <textarea id="i-desc" placeholder="Apraksts, kā realizēt, kāpēc tas varētu strādāt..." rows="2"></textarea>
+      <div class="row">
+        <select id="i-cat" style="flex:1">${IDEA_CATS.map(c=>`<option>${c}</option>`).join('')}</select>
+        <select id="i-pri" style="flex:1"><option>Vidēja</option><option>Augsta</option><option>Zema</option></select>
+      </div>
+      <button class="btn btn-gold" onclick="addIdea()">Pierakstīt ideju</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+    ${IDEA_STATUS.map(status=>{
+      const items=S.ideas.filter(i=>i.status===status);
+      const colors={Jauna:'var(--gold)',Attīstīšanā:'#5b9bd5',Realizēta:'#4caf7a',Atmesta:'var(--muted)'};
+      const col=colors[status]||'var(--muted)';
+      return `<div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:${col};margin-bottom:10px;padding-left:2px">
+          ${status==='Jauna'?'💡':status==='Attīstīšanā'?'⚙️':status==='Realizēta'?'✓':'✗'} ${status} (${items.length})
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${items.length===0?`<div style="padding:16px;background:var(--s2);border-radius:var(--r-sm);text-align:center;color:var(--dim);font-size:12px">—</div>`:''}
+          ${items.map((idea)=>{
+            const realIdx=S.ideas.findIndex(x=>x.date===idea.date&&x.title===idea.title);
+            return `<div style="background:var(--s2);border-radius:var(--r-sm);border-top:1px solid ${col}44;padding:12px">
+              <div class="row" style="justify-content:space-between;margin-bottom:5px">
+                <span style="font-size:10px;font-weight:600;color:${IDEA_PRIORITY[idea.priority||'Vidēja']}">${idea.priority||'Vidēja'} prioritāte</span>
+                <button onclick="deleteIdea(${realIdx})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:12px">✕</button>
+              </div>
+              <div style="font-weight:500;font-size:13px;margin-bottom:4px">${idea.title}</div>
+              ${idea.desc?`<div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5">${idea.desc.substring(0,100)}${idea.desc.length>100?'...':''}</div>`:''}
+              <span class="xs" style="color:var(--dim)">${idea.cat} · ${new Date(idea.date).toLocaleDateString('lv')}</span>
+              <div class="row" style="gap:4px;margin-top:8px;flex-wrap:wrap">
+                ${IDEA_STATUS.filter(s=>s!==status).map(s=>`<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:3px 8px" onclick="setIdeaStatus(${realIdx},'${s}')">→ ${s}</button>`).join('')}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+function addIdea(){const t=document.getElementById('i-title')?.value.trim();if(!t)return;S.ideas.push({title:t,desc:document.getElementById('i-desc')?.value.trim()||'',cat:document.getElementById('i-cat')?.value||'Cits',priority:document.getElementById('i-pri')?.value||'Vidēja',status:'Jauna',date:new Date().toISOString()});save('ideas');showToast('✓ Ideja pierakstīta!');renderContent();}
+function setIdeaStatus(i,s){S.ideas[i].status=s;save('ideas');renderContent();}
+function deleteIdea(i){if(!confirm('Dzēst šo ideju?'))return;S.ideas.splice(i,1);save('ideas');renderContent();}
+
+// ─── KNOWLEDGE BASE ──────────────────────────────────────
+let kbFilter='Visi';
+let kbSearch='';
+const KB_CATS=['Finanses','Investīcijas','Veselība','Pašattīstība','Bizness','Tehnoloģijas','Vēsture','Cits'];
+const KB_STATUS={Neizlasīts:'var(--gold)',Lasu:'#5b9bd5',Izlasīts:'#4caf7a'};
+
+function renderKnowledge() {
+  const q=kbSearch.toLowerCase();
+  const all=[...S.kb].reverse();
+  const filtered=all.filter(r=>(kbFilter==='Visi'||r.status===kbFilter)&&(!q||r.title.toLowerCase().includes(q)||(r.notes||'').toLowerCase().includes(q)||(r.author||'').toLowerCase().includes(q)));
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">📚 Knowledge Base</div>
+    <div class="sec-sub">Grāmatas, raksti, kursi — viss ko mācos</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">Pievienot resursu</span></div>
+    <div class="col">
+      <input type="text" id="kb-title" placeholder="Grāmatas/raksta nosaukums...">
+      <div class="row"><input type="text" id="kb-author" placeholder="Autors" style="flex:1"><input type="url" id="kb-url" placeholder="URL (neobligāti)" style="flex:1"></div>
+      <div class="row"><select id="kb-cat" style="flex:1">${KB_CATS.map(c=>`<option>${c}</option>`).join('')}</select><select id="kb-status" style="flex:1"><option>Neizlasīts</option><option>Lasu</option><option>Izlasīts</option></select></div>
+      <textarea id="kb-notes" placeholder="Galvenās atziņas, ieteikums, kāpēc vērts lasīt..." rows="2"></textarea>
+      <div><div class="xs" style="color:var(--muted);margin-bottom:5px">Vērtējums</div>
+      <div class="row" style="gap:6px" id="kb-stars">${[1,2,3,4,5].map(n=>`<button onclick="setKbRating(${n})" id="kbs-${n}" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--dim);transition:color .1s">★</button>`).join('')}</div></div>
+      <button class="btn btn-gold" onclick="addKb()">Pievienot Knowledge Base</button>
+    </div>
+  </div>
+  <div class="row" style="gap:8px;margin-bottom:10px">
+    <input type="text" id="kb-search" placeholder="🔍 Meklēt..." value="${kbSearch}" oninput="kbSearch=this.value;renderContent()" style="flex:1">
+  </div>
+  <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    ${['Visi','Neizlasīts','Lasu','Izlasīts'].map(f=>`<button class="btn btn-${kbFilter===f?'gold':'ghost'} btn-sm" onclick="kbFilter='${f}';renderContent()">${f} (${f==='Visi'?S.kb.length:S.kb.filter(r=>r.status===f).length})</button>`).join('')}
+  </div>
+  ${filtered.length===0?`<div class="empty-state">${S.kb.length===0?'Nav resursu. Pievieno pirmo grāmatu! 📚':'Nav rezultātu.'}</div>`:''}
+  <div style="display:flex;flex-direction:column;gap:10px">
+    ${filtered.map((r)=>{
+      const i=S.kb.findIndex(x=>x.date===r.date&&x.title===r.title);
+      const sc=KB_STATUS[r.status||'Neizlasīts']||'var(--muted)';
+      return `<div class="card-sm" style="border-left:3px solid ${sc}">
+        <div class="row" style="justify-content:space-between;margin-bottom:7px">
+          <div class="row" style="gap:6px">
+            <span style="background:${sc}22;color:${sc};font-size:10px;padding:2px 9px;border-radius:20px;font-weight:600">${r.status||'Neizlasīts'}</span>
+            <span class="xs" style="color:var(--muted)">${r.cat}</span>
+            ${r.rating?`<span style="color:var(--gold);font-size:12px">${'★'.repeat(r.rating)}</span>`:''}
+          </div>
+          <div class="row" style="gap:10px">
+            <span class="xs" style="color:var(--dim)">${new Date(r.date).toLocaleDateString('lv')}</span>
+            <button onclick="deleteKb(${i})" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">✕</button>
+          </div>
+        </div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px">${r.title}</div>
+        ${r.author?`<div class="xs" style="color:var(--muted);margin-bottom:6px">${r.author}</div>`:''}
+        ${r.notes?`<div style="font-size:13px;color:var(--muted);margin-bottom:7px;line-height:1.55">${r.notes}</div>`:''}
+        <div class="row" style="gap:6px">
+          ${['Neizlasīts','Lasu','Izlasīts'].filter(s=>s!==r.status).map(s=>`<button class="btn btn-ghost btn-sm" onclick="setKbStatus(${i},'${s}')">→ ${s}</button>`).join('')}
+          ${r.url?`<a href="${r.url}" target="_blank" style="font-size:12px;color:var(--gold);text-decoration:none;margin-left:auto">Atvērt ↗</a>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+let _kbRating=0;
+function setKbRating(n){_kbRating=n;[1,2,3,4,5].forEach(i=>{const b=document.getElementById('kbs-'+i);if(b)b.style.color=i<=n?'var(--gold)':'var(--dim)';});}
+function addKb(){const t=document.getElementById('kb-title')?.value.trim();if(!t)return;S.kb.push({title:t,author:document.getElementById('kb-author')?.value.trim()||'',url:document.getElementById('kb-url')?.value.trim()||'',cat:document.getElementById('kb-cat')?.value||'Cits',status:document.getElementById('kb-status')?.value||'Neizlasīts',notes:document.getElementById('kb-notes')?.value.trim()||'',rating:_kbRating||0,date:new Date().toISOString()});_kbRating=0;save('kb');showToast('✓ Resurss pievienots!');renderContent();}
+function setKbStatus(i,s){S.kb[i].status=s;save('kb');renderContent();}
+function deleteKb(i){if(!confirm('Dzēst?'))return;S.kb.splice(i,1);save('kb');renderContent();}
+
+// ─── WEEKLY CEO REVIEW ────────────────────────────────────
+function getWeekLabel(offset=0) {
+  const d=new Date(); d.setDate(d.getDate()-d.getDay()+1+offset*7);
+  const end=new Date(d); end.setDate(d.getDate()+6);
+  return `${d.toLocaleDateString('lv',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('lv',{day:'numeric',month:'short',year:'numeric'})}`;
+}
+
+function autoWeekStats() {
+  const now=new Date(); const weekAgo=new Date(now-7*86400000);
+  const weekIncome=(S.finance.income||[]).filter(i=>new Date(i.date)>=weekAgo).reduce((a,i)=>a+Number(i.amount),0);
+  const weekExp=(S.finance.expenses||[]).filter(e=>new Date(e.date)>=weekAgo).reduce((a,e)=>a+Number(e.amount),0);
+  const weekBody=load('bodyLog',[]).filter(e=>new Date(e.date)>=weekAgo);
+  const avgSleep=weekBody.length?Math.round(weekBody.reduce((a,e)=>a+(e.sleep||0),0)/weekBody.length*10)/10:null;
+  const workouts=weekBody.filter(e=>e.workout).length;
+  const weekMoods=S.moodLog.filter(e=>new Date(e.date)>=weekAgo);
+  const avgEnergy=weekMoods.length?Math.round(weekMoods.reduce((a,e)=>a+(e.energy||0),0)/weekMoods.length*10)/10:null;
+  const tasksAll=[...(S.tasks.today||[]),...(S.tasks.week||[])];
+  const tasksDone=tasksAll.filter(t=>t.done).length;
+  return {weekIncome,weekExp,avgSleep,workouts,avgEnergy,tasksDone,totalTasks:tasksAll.length};
+}
+
+function renderCeoReview() {
+  const past=[...S.reviews].reverse().slice(0,5);
+  const st=autoWeekStats();
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">🔥 Weekly CEO Review</div>
+    <div class="sec-sub">${getWeekLabel()} — analizē savu nedēļu kā CEO</div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">📊 Šīs nedēļas auto-kopsavilkums</span></div>
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card"><div class="stat-lbl">Ieņēmumi</div><div class="stat-val gold">€${fmt(st.weekIncome)}</div></div>
+      <div class="stat-card"><div class="stat-lbl">Izdevumi</div><div class="stat-val">€${fmt(st.weekExp)}</div></div>
+      <div class="stat-card"><div class="stat-lbl">Treniņi</div><div class="stat-val">${st.workouts}<span class="stat-unit">/7</span></div></div>
+      <div class="stat-card"><div class="stat-lbl">Vidējais miegs</div><div class="stat-val">${st.avgSleep||'—'}<span class="stat-unit">h</span></div></div>
+      <div class="stat-card"><div class="stat-lbl">Vidējā enerģija</div><div class="stat-val">${st.avgEnergy||'—'}<span class="stat-unit">/10</span></div></div>
+      <div class="stat-card"><div class="stat-lbl">Uzdevumi</div><div class="stat-val">${st.tasksDone}<span class="stat-unit">/${st.totalTasks}</span></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><span class="card-title">✍️ Šīs nedēļas izvērtējums</span></div>
+    <div class="col">
+      ${[
+        {id:'r-wins',label:'✅ Kas izdevās šonedēļ?',ph:'Sasniegumi, uzvaras, lieliskie momenti...'},
+        {id:'r-fails',label:'❌ Kas neizdevās?',ph:'Kļūdas, nokavētās iespējas, traucēkļi...'},
+        {id:'r-learn',label:'🧠 Ko iemācījos?',ph:'Atziņas, mācības, jauni skatījumi...'},
+        {id:'r-prio',label:'🎯 Prioritātes nākamajai nedēļai',ph:'3-5 svarīgākie uzdevumi...'},
+        {id:'r-energy',label:'⚡ Enerģijas un garastāvokļa novērtējums',ph:'Kā jutāties šonedēļ kopumā?'},
+        {id:'r-note',label:'💬 Personīgais komentārs JOHN',ph:'Brīvi raksti — domu atbrīvošana...'},
+      ].map(f=>`<div>
+        <div style="font-size:12px;color:var(--gold);margin-bottom:5px;font-weight:500">${f.label}</div>
+        <textarea id="${f.id}" placeholder="${f.ph}" rows="2"></textarea>
+      </div>`).join('')}
+      <button class="btn btn-gold" onclick="saveCeoReview()" style="width:100%">Saglabāt šīs nedēļas review</button>
+    </div>
+  </div>
+  ${past.length>0?`
+  <div class="card">
+    <div class="card-h"><span class="card-title">📁 Iepriekšējie Reviews</span></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${past.map((r,i)=>`
+        <div style="background:var(--s1);border-radius:var(--r-sm);overflow:hidden">
+          <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+            <div>
+              <div style="font-weight:500;font-size:13px">${r.week}</div>
+              <div class="xs" style="color:var(--dim)">${new Date(r.date).toLocaleDateString('lv',{weekday:'long',day:'numeric',month:'long'})}</div>
+            </div>
+            <span style="color:var(--gold)">▼</span>
+          </div>
+          <div style="display:none;padding:0 14px 14px">
+            ${r.wins?`<div class="xs" style="color:var(--muted);margin-top:8px"><span style="color:#4caf7a">✅ Izdevās:</span> ${r.wins}</div>`:''}
+            ${r.fails?`<div class="xs" style="color:var(--muted);margin-top:4px"><span style="color:#e05555">❌ Neizdevās:</span> ${r.fails}</div>`:''}
+            ${r.learn?`<div class="xs" style="color:var(--muted);margin-top:4px"><span style="color:var(--gold)">🧠 Mācījos:</span> ${r.learn}</div>`:''}
+            ${r.prio?`<div class="xs" style="color:var(--muted);margin-top:4px"><span style="color:var(--gold)">🎯 Prioritātes:</span> ${r.prio}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`:'' }`;
+}
+function saveCeoReview(){
+  const fields=['wins','fails','learn','prio','energy','note'];
+  const data={date:new Date().toISOString(),week:getWeekLabel()};
+  fields.forEach(f=>{data[f]=document.getElementById('r-'+f)?.value.trim()||'';});
+  if(!Object.values(data).some((v,i)=>i>1&&v)) return showToast('Aizpildi vismaz vienu lauku!');
+  S.reviews.push(data);save('reviews');showToast('✓ Review saglabāts!');renderContent();
+}
+
+// ─── LIFE TIMELINE ────────────────────────────────────────
+let tlMonth='';
+
+function gatherTimelineEvents() {
+  const events=[];
+  (S.journal||[]).forEach(e=>events.push({date:e.date,type:'journal',icon:'📓',title:'Žurnāla ieraksts',body:e.text.substring(0,120)+'...'}));
+  (S.moodLog||[]).forEach(e=>events.push({date:e.date,type:'mood',icon:(e.moods||[])[0]?MOOD_MAP[(e.moods||[])[0]]||'😊':'😊',title:'Garastāvoklis: '+(e.moods||[]).join(', ')||'Ieraksts',body:`Enerģija ${e.energy||0}/10${e.notes?' · "'+e.notes.substring(0,60)+'"':''}`}));
+  const quests=load('quests',[]);
+  quests.filter(q=>q.done).forEach(q=>events.push({date:q.date,type:'quest',icon:'🗺️',title:'Side Quest izpildīts',body:q.t}));
+  (S.goals||[]).filter(g=>g.status==='Pabeigts').forEach(g=>events.push({date:g.created,type:'goal',icon:'🎯',title:'Mērķis sasniegts: '+g.name,body:g.desc||''}));
+  (S.finance.income||[]).filter(i=>Number(i.amount)>100).forEach(i=>events.push({date:i.date,type:'finance',icon:'💰',title:`Ieņēmums: €${fmt(i.amount)}`,body:i.source||''}));
+  return events.sort((a,b)=>new Date(b.date)-new Date(a.date));
+}
+
+function renderTimeline() {
+  const all=gatherTimelineEvents();
+  const months=[...new Set(all.map(e=>new Date(e.date).toLocaleDateString('lv',{year:'numeric',month:'long'})))];
+  const filtered=tlMonth?all.filter(e=>new Date(e.date).toLocaleDateString('lv',{year:'numeric',month:'long'})===tlMonth):all;
+  const TYPE_COLORS={journal:'rgba(201,168,76,0.15)',mood:'rgba(91,155,213,0.15)',quest:'rgba(74,175,106,0.15)',goal:'rgba(201,168,76,0.25)',finance:'rgba(74,175,106,0.2)'};
+  return `
+  <div class="sec-hdr">
+    <div class="sec-title">📸 Life Timeline</div>
+    <div class="sec-sub">${all.length} notikumi · visa tava dzīve hronoloģiski</div>
+  </div>
+  ${months.length>0?`
+  <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <button class="btn btn-${!tlMonth?'gold':'ghost'} btn-sm" onclick="tlMonth='';renderContent()">Visi (${all.length})</button>
+    ${months.slice(0,12).map(m=>`<button class="btn btn-${tlMonth===m?'gold':'ghost'} btn-sm" onclick="tlMonth='${m}';renderContent()">${m}</button>`).join('')}
+  </div>`:''}
+  ${filtered.length===0?`<div class="empty-state" style="padding:60px">Sāc pievienot datus JOHN — tie parādīsies šeit kā tava dzīves hronika. 📸</div>`:''}
+  <div style="position:relative;padding-left:20px">
+    <div style="position:absolute;left:7px;top:0;bottom:0;width:1px;background:var(--gold-line)"></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      ${filtered.map(e=>`
+        <div style="position:relative">
+          <div style="position:absolute;left:-17px;top:12px;width:9px;height:9px;border-radius:50%;background:var(--gold);border:2px solid var(--bg)"></div>
+          <div style="background:${TYPE_COLORS[e.type]||'var(--s2)'};border-radius:var(--r-sm);border:1px solid rgba(255,255,255,0.04);padding:12px 14px">
+            <div class="row" style="justify-content:space-between;margin-bottom:5px">
+              <div class="row" style="gap:7px">
+                <span style="font-size:16px">${e.icon}</span>
+                <span style="font-size:13px;font-weight:500">${e.title}</span>
+              </div>
+              <span class="xs" style="color:var(--dim);flex-shrink:0">${new Date(e.date).toLocaleDateString('lv',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</span>
+            </div>
+            ${e.body?`<div class="xs" style="color:var(--muted);padding-left:24px;line-height:1.55">${e.body}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ─── PLACEHOLDER ─────────────────────────────────────────
+function renderPlaceholder() {
+  const n=NAV.find(x=>x.id===S.sec)||{icon:'🔧',lbl:S.sec};
+  return `
+  <div class="sec-hdr"><div class="sec-title">${n.icon} ${n.lbl}</div><div class="sec-sub">Šī sadaļa tiek veidota</div></div>
+  <div class="placeholder">
+    <div class="placeholder-icon">${n.icon}</div>
+    <div class="placeholder-title">Drīzumā</div>
+    <div class="placeholder-sub">Šī sadaļa tiks pievienota nākamajā atjauninājumā</div>
+  </div>`;
+}
+
+// ─── CONTENT ROUTER ──────────────────────────────────────
+function renderContent() {
+  const el=document.getElementById('content');
+  switch(S.sec) {
+    case 'dashboard':    el.innerHTML=renderDashboard(); initDashboardCalendar(); break;
+    case 'goals':        el.innerHTML=renderGoals(); break;
+    case 'side-quests':  el.innerHTML=renderSideQuests(); initSideQuests(); break;
+    case 'journal':      el.innerHTML=renderJournal(); break;
+    case 'second-brain': el.innerHTML=renderBrain(); break;
+    case 'finance':      el.innerHTML=renderFinance(); break;
+    case 'body':         el.innerHTML=renderBody()+renderBodyHistory(); break;
+    case 'investments':  el.innerHTML=renderInvestments(); break;
+    case 'mood':         el.innerHTML=renderMoodPage(); break;
+    case 'news':         el.innerHTML=renderNews(); break;
+    case 'ideas':        el.innerHTML=renderIdeas(); break;
+    case 'knowledge':    el.innerHTML=renderKnowledge(); break;
+    case 'ceo-review':   el.innerHTML=renderCeoReview(); break;
+    case 'timeline':     el.innerHTML=renderTimeline(); break;
+    case 'settings':     el.innerHTML=renderSettings(); initCalSettings(); break;
+    default:             el.innerHTML=renderPlaceholder();
+  }
+  el.scrollTop=0;
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────
+function go(sec) { S.sec=sec; S.addingTask=false; renderNav(); renderContent(); closeSidebar(); }
+function toggleSidebar(){const open=document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open',open);}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('open');}
+function toggleChat(){document.getElementById('chat').classList.toggle('open');}
+
+// ─── JOHN AI CHAT ────────────────────────────────────────
+const SYS=`Tu esi JOHN — personīgs AI Life OS. Tu runā latviski. Tu esi tiešs, gudrs un motivējošs. Tu palīdzi ar finansēm, veselību, mērķiem, investīcijām, ziņām un pašattīstību. Tu zini ka lietotājs ir 18 gadus vecs, dzīvo Latvijā, vāc sudrabu un zeltu Tavex, seko S&P500, grib finansiālo brīvību. Atbildes 2-4 teikumi — īsas un konkrētas. Sauc lietotāju par "Boss".`;
+
+function initChat() {
+  if(S.chat.length===0) {
+    S.chat.push({role:'assistant',content:`Sveiks, Boss! 👋 Es esmu JOHN — tavs personīgais Life OS. Esmu gatavs palīdzēt ar finansēm, veselību, mērķiem un investīcijām. Ko darām šodien?`});
+    save('chat');
+  }
+  renderChatMsgs();
+}
+
+function renderChatMsgs() {
+  const el=document.getElementById('chat-msgs');
+  el.innerHTML=S.chat.map(m=>m.role==='assistant'?`
+    <div class="msg msg-ai"><div class="msg-ai-name">JOHN</div>${m.content}</div>
+  `:`<div class="msg msg-user">${m.content}</div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+function addTyping() {
+  const el=document.getElementById('chat-msgs');
+  const d=document.createElement('div');
+  d.id='typing'; d.className='msg msg-ai';
+  d.innerHTML='<div class="msg-ai-name">JOHN</div><div class="typing"><span></span><span></span><span></span></div>';
+  el.appendChild(d); el.scrollTop=el.scrollHeight;
+}
+function rmTyping() { document.getElementById('typing')?.remove(); }
+
+async function sendMsg() {
+  const inp=document.getElementById('chat-in');
+  const btn=document.getElementById('chat-send');
+  const text=inp.value.trim(); if(!text) return;
+  S.chat.push({role:'user',content:text}); save('chat');
+  inp.value=''; inp.style.height='auto'; renderChatMsgs();
+  btn.disabled=true; addTyping();
+  const dpctChat = S.dream.target>0 ? Math.round(S.dream.current/S.dream.target*100)+'%' : 'nav iestatīts';
+  const ctx=`[JOHN konteksts: Life Score=${lsTotal()}, Streak=${streak()} dienas, Uzdevumi šodien=${todayStats().done}/${todayStats().total}, Sapnis="${S.dream.name||'nav'}" progress=${dpctChat}, Miegs=${S.body.sleep||'nav'}h, Enerģija=${S.body.energy||'nav'}/10, Balanss=€${totalBalance()}]`;
+  try {
+    const r=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:HAIKU,
+        max_tokens:80,
+        system:SYS+'\n'+ctx,
+        messages:S.chat.filter(m=>m.role!=='system').slice(-20)
+      })
+    });
+    if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API kļūda');}
+    const data=await r.json();
+    const reply=data.content[0].text;
+    rmTyping();
+    S.chat.push({role:'assistant',content:reply}); save('chat'); renderChatMsgs();
+  } catch(e) {
+    rmTyping();
+    S.chat.push({role:'assistant',content:`⚠️ ${e.message||'Savienojuma kļūda'}. Pārbaudi vai serveris darbojas un ANTHROPIC_API_KEY ir iestatīta .env failā.`}); save('chat'); renderChatMsgs();
+  } finally { btn.disabled=false; }
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+function showToast(msg) {
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';Object.assign(t.style,{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:'var(--s2)',border:'1px solid var(--gold-line)',color:'var(--text)',padding:'10px 20px',borderRadius:'8px',fontSize:'13px',zIndex:'9999',transition:'opacity .3s',boxShadow:'0 4px 20px rgba(0,0,0,.5)'});document.body.appendChild(t);}
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.style.opacity='0',2500);
+}
+
+// ─── GOOGLE CALENDAR ──────────────────────────────────────
+let _calStatus = null;
+
+async function getCalStatus(force) {
+  if (!force && _calStatus !== null) return _calStatus;
+  try {
+    const r = await fetch('/api/calendar/status');
+    _calStatus = await r.json();
+  } catch { _calStatus = { configured: false, connected: false }; }
+  return _calStatus;
+}
+
+async function initDashboardCalendar() {
+  const status = await getCalStatus();
+  const el = document.getElementById('cal-events-content');
+  if (!el) return;
+
+  if (!status.configured) {
+    el.innerHTML = `<div class="empty-state" style="padding:12px;font-size:12px">Google Calendar nav iestatīts. <span class="gold" style="cursor:pointer" onclick="go('settings')">Iestatī ⚙️</span></div>`;
+    return;
+  }
+  if (!status.connected) {
+    el.innerHTML = `<div style="text-align:center;padding:14px">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:10px">Nav savienots ar Google Calendar</div>
+      <button class="btn btn-gold btn-sm" onclick="calConnect()">Savienot ar Google</button>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = '<div class="xs" style="color:var(--muted);padding:8px">Ielādē...</div>';
+  try {
+    const [evResp, taskResp] = await Promise.all([
+      fetch('/api/calendar/events'),
+      fetch('/api/calendar/tasks'),
+    ]);
+
+    const evData = await evResp.json();
+    if (!evResp.ok) throw new Error(evData.error || 'Kļūda');
+    const events = evData.events || [];
+
+    let tasks = [];
+    let needsTaskScope = false;
+    if (taskResp.ok) {
+      tasks = (await taskResp.json()).tasks || [];
+    } else if (taskResp.status === 403) {
+      needsTaskScope = true;
+    }
+
+    const total = events.length + tasks.length;
+    const briefCal = document.getElementById('brief-cal');
+    if (briefCal && total > 0) {
+      briefCal.textContent = `📅 ${total} notikum${total === 1 ? 's' : 'i'} šodien. `;
+    }
+
+    if (events.length === 0 && tasks.length === 0) {
+      el.innerHTML = `<div class="empty-state" style="padding:12px">Šodien nav plānotu notikumu 🎉</div>
+        ${needsTaskScope ? `<div style="padding:6px 4px;font-size:11px;color:var(--muted)">⚠️ Google Tasks nav redzami — <span class="gold" style="cursor:pointer" onclick="reconnectCalendar()">atkārtoti savienojies</span> lai piešķirtu atļauju.</div>` : ''}`;
+      return;
+    }
+
+    let html = '<div style="display:flex;flex-direction:column;gap:6px">';
+
+    events.forEach(e => {
+      const timeStr = e.allDay ? 'Visa diena' : fmtEventTime(e.start);
+      const endStr = !e.allDay && e.end ? '–' + fmtEventTime(e.end) : '';
+      const color = e.calendarColor || 'var(--gold)';
+      html += `<div class="task-item">
+        <span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block;margin-top:2px"></span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.title}</div>
+          <div class="xs" style="color:var(--dim)">${e.calendarName}${e.location ? ' · ' + e.location : ''}</div>
+        </div>
+        <span class="xs" style="color:var(--gold);flex-shrink:0;font-weight:600;margin-left:8px">${timeStr}${endStr ? ' ' + endStr : ''}</span>
+      </div>`;
+    });
+
+    if (tasks.length > 0) {
+      if (events.length > 0) {
+        html += `<div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 2px 2px;border-top:1px solid rgba(255,255,255,0.05);margin-top:2px">Uzdevumi</div>`;
+      }
+      tasks.forEach(t => {
+        const dueStr = t.due ? fmtTaskDue(t.due) : '';
+        const overdue = t.due && new Date(t.due) < new Date(new Date().toDateString());
+        html += `<div class="task-item">
+          <span style="font-size:13px;flex-shrink:0">☑</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.title}</div>
+            <div class="xs" style="color:var(--dim)">${t.listName}</div>
+          </div>
+          ${dueStr ? `<span class="xs" style="color:${overdue ? '#e05555' : 'var(--muted)'};flex-shrink:0;margin-left:8px">${dueStr}</span>` : ''}
+        </div>`;
+      });
+    }
+
+    html += '</div>';
+
+    if (needsTaskScope) {
+      html += `<div style="padding:8px 4px 0;font-size:11px;color:var(--muted)">⚠️ <span class="gold" style="cursor:pointer" onclick="reconnectCalendar()">Atkārtoti savienojies</span> lai redzētu Google Tasks.</div>`;
+    }
+
+    el.innerHTML = html;
+  } catch (err) {
+    el.innerHTML = `<div class="empty-state" style="padding:12px;color:#e05555;font-size:12px">${err.message}</div>`;
+  }
+}
+
+function fmtTaskDue(iso) {
+  const d = new Date(iso);
+  const today = new Date(); today.setHours(0,0,0,0);
+  d.setHours(0,0,0,0);
+  const diff = Math.round((d - today) / 86400000);
+  if (diff < 0) return `Kavējas ${Math.abs(diff)}d`;
+  if (diff === 0) return 'Šodien';
+  if (diff === 1) return 'Rīt';
+  return d.toLocaleDateString('lv', { day: 'numeric', month: 'short' });
+}
+
+async function reconnectCalendar() {
+  await fetch('/api/calendar/disconnect', { method: 'DELETE' });
+  _calStatus = null;
+  calConnect();
+}
+
+function fmtEventTime(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleTimeString('lv', { hour: '2-digit', minute: '2-digit' });
+}
+
+async function initCalSettings() {
+  const status = await getCalStatus(true);
+  const el = document.getElementById('gcal-settings-content');
+  if (!el) return;
+
+  if (!status.configured) {
+    el.innerHTML = `
+      <div style="font-size:12px;color:var(--muted);line-height:1.75;margin-bottom:4px">
+        <div style="color:var(--text);font-weight:600;margin-bottom:10px">Kā iestatīt Google Calendar:</div>
+        <ol style="padding-left:18px;display:flex;flex-direction:column;gap:5px">
+          <li>Atver <a href="https://console.cloud.google.com" target="_blank" style="color:var(--gold)">Google Cloud Console</a> un izveido projektu</li>
+          <li>Iespējo <strong>Google Calendar API</strong> — APIs &amp; Services → Library</li>
+          <li>Ej uz <strong>APIs &amp; Services → Credentials → Create Credentials → OAuth Client ID</strong></li>
+          <li>Izvēlies tipu: <strong>Web application</strong></li>
+          <li>Pievieno Authorized redirect URI:<br>
+            <code style="background:var(--s1);padding:3px 8px;border-radius:4px;display:inline-block;margin-top:3px">http://localhost:3000/api/calendar/callback</code>
+          </li>
+          <li>Nokopē <strong>Client ID</strong> un <strong>Client Secret</strong></li>
+          <li>Pievieno <code style="background:var(--s1);padding:2px 6px;border-radius:4px">.env</code> failam:<br>
+            <code style="background:var(--s1);padding:5px 10px;border-radius:4px;display:block;margin-top:5px;line-height:1.8">GOOGLE_CLIENT_ID=tava_client_id<br>GOOGLE_CLIENT_SECRET=tavs_client_secret</code>
+          </li>
+          <li>Restartē serveri un atsvaidzini lapu</li>
+        </ol>
+      </div>`;
+    return;
+  }
+
+  if (status.connected) {
+    el.innerHTML = `
+      <div class="row" style="gap:10px;margin-bottom:14px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#4caf7a;flex-shrink:0"></div>
+        <span style="font-size:13px;color:#4caf7a;font-weight:600">Savienots ar Google Calendar</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="calDisconnect()" style="color:#e05555">Atvienot</button>`;
+  } else {
+    el.innerHTML = `
+      <div class="row" style="gap:10px;margin-bottom:14px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0"></div>
+        <span style="font-size:13px;color:var(--muted)">Nav savienots</span>
+      </div>
+      <button class="btn btn-gold" onclick="calConnect()">Savienot ar Google</button>`;
+  }
+}
+
+async function calConnect() {
+  try {
+    const r = await fetch('/api/calendar/auth-url');
+    const data = await r.json();
+    if (data.url) window.location.href = data.url;
+    else showToast(data.error || 'Kļūda');
+  } catch { showToast('Nevar savienoties ar serveri'); }
+}
+
+async function calDisconnect() {
+  if (!confirm('Atvienot Google Calendar?')) return;
+  await fetch('/api/calendar/disconnect', { method: 'DELETE' });
+  _calStatus = { ..._calStatus, connected: false };
+  showToast('✓ Google Calendar atvienots');
+  renderContent();
+}
+
+function showAddEventModal() {
+  if (_calStatus && !_calStatus.connected) {
+    showToast('Vispirms savienojies ar Google Calendar ⚙️');
+    return;
+  }
+  const today = new Date().toISOString().split('T')[0];
+  const ov = document.createElement('div');
+  ov.className = 'overlay'; ov.id = 'add-event-ov';
+  ov.innerHTML = `<div class="modal">
+    <div class="modal-title">📅 Pievienot notikumu</div>
+    <div class="modal-sub">Pievieno notikumu savā Google Calendar</div>
+    <div class="col" style="gap:10px">
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:5px">Nosaukums *</div>
+        <input type="text" id="ev-title" placeholder="Notikuma nosaukums...">
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:5px">Datums *</div>
+        <input type="date" id="ev-date" value="${today}" style="color-scheme:dark">
+      </div>
+      <div class="row" style="gap:8px">
+        <div style="flex:1">
+          <div class="xs" style="color:var(--muted);margin-bottom:5px">Sākums</div>
+          <input type="time" id="ev-start" style="color-scheme:dark">
+        </div>
+        <div style="flex:1">
+          <div class="xs" style="color:var(--muted);margin-bottom:5px">Beigas</div>
+          <input type="time" id="ev-end" style="color-scheme:dark">
+        </div>
+      </div>
+      <div>
+        <div class="xs" style="color:var(--muted);margin-bottom:5px">Apraksts</div>
+        <textarea id="ev-desc" placeholder="Papildinformācija..." rows="2"></textarea>
+      </div>
+      <div class="row" style="gap:8px;margin-top:8px">
+        <button class="btn btn-ghost" onclick="closeAddEvent()" style="flex:1">Atcelt</button>
+        <button class="btn btn-gold" onclick="submitAddEvent()" style="flex:1">Pievienot</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  setTimeout(() => document.getElementById('ev-title')?.focus(), 50);
+}
+
+function closeAddEvent() { document.getElementById('add-event-ov')?.remove(); }
+
+async function submitAddEvent() {
+  const title = document.getElementById('ev-title')?.value.trim();
+  const date = document.getElementById('ev-date')?.value;
+  if (!title || !date) { showToast('Ievadi nosaukumu un datumu!'); return; }
+  try {
+    const r = await fetch('/api/calendar/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title, date,
+        startTime: document.getElementById('ev-start')?.value || '',
+        endTime: document.getElementById('ev-end')?.value || '',
+        description: document.getElementById('ev-desc')?.value.trim() || '',
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    closeAddEvent();
+    showToast('✓ Notikums pievienots Google Calendar!');
+    initDashboardCalendar();
+  } catch (err) { showToast('Kļūda: ' + (err.message || 'Neizdevās')); }
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('gcal_connected')) {
+    _calStatus = null;
+    S.sec = 'settings';
+    window.history.replaceState({}, '', '/');
+  }
+  if (params.get('gcal_error')) {
+    S.sec = 'settings';
+    window.history.replaceState({}, '', '/');
+  }
+
+  renderNav();
+  renderContent();
+  renderLS();
+  initChat();
+
+  if (params.get('gcal_connected')) showToast('✓ Google Calendar pievienots!');
+  if (params.get('gcal_error')) showToast('⚠️ Google Calendar savienošanās kļūda');
+
+  const ci=document.getElementById('chat-in');
+  ci.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';});
+  ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+  document.getElementById('chat-send').addEventListener('click',sendMsg);
+}
+
+init();
+</script>
+</body>
+</html>
