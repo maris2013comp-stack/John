@@ -311,15 +311,13 @@ const NAV = [
   {id:'second-brain',icon:'🧠',lbl:'Second Brain'},
   {id:'finance',icon:'💰',lbl:'Finance'},
   {id:'body',icon:'💪',lbl:'Body'},
-  {id:'investments',icon:'📈',lbl:'Investments'},
-  {id:'mood',icon:'😊',lbl:'Mood'},
-  {id:'news',icon:'🌍',lbl:'News'},
-  {id:'ideas',icon:'💡',lbl:'Ideas'},
-  {id:'knowledge',icon:'📚',lbl:'Knowledge Base'},
-  {id:'ceo-review',icon:'🔥',lbl:'Weekly CEO Review'},
-  {id:'timeline',icon:'📸',lbl:'Life Timeline'},
   {id:'settings',icon:'⚙️',lbl:'Settings'},
 ];
+// Hidden from nav (functionality preserved in code):
+// investments -> Finance > Investīcijas tab
+// mood        -> Body > Garastāvoklis section
+// ideas       -> Second Brain > Idejas tab
+// news, knowledge, ceo-review, timeline -> hidden, re-enable when ready
 
 // ─── UTILS ───────────────────────────────────────────────
 function greet() {
@@ -436,6 +434,7 @@ function renderDashboard() {
   const ls = lsTotal();
   const sav = totalBalance();
   const dpct = S.dream.target>0 ? Math.min(100, Math.round((S.dream.current/S.dream.target)*100)) : 0;
+  const quests = getQuests();
 
   const brief = `Šodien tev ir ${total} uzdevumi — ${done} izpildīts. Enerģija: ${S.body.energy||'—'}/10. Life Score: ${ls}/100. 🔥 Streak: ${str} dienas. <span id="brief-cal"></span>Katrs solis tuvina tevi finansiālajai brīvībai, Boss.`;
 
@@ -502,6 +501,17 @@ function renderDashboard() {
       <button class="btn btn-ghost btn-sm" onclick="showAddEventModal()">+ Pievienot</button>
     </div>
     <div id="cal-events-content"><div class="xs" style="color:var(--muted);padding:8px">Ielādē...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <span class="card-title">🗺️ Side Quests šodien</span>
+      <button class="btn btn-ghost btn-sm" onclick="go('side-quests')">Visi →</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${quests.map((q,i)=>{const b=QUEST_BADGE[q.diff]||QUEST_BADGE.easy;return`<div class="task-item"><button class="task-check${q.done?' done':''}" onclick="completeQuest(${i})">${q.done?'✓':''}</button><span class="task-txt${q.done?' done':''}" style="font-size:13px">${q.t}</span><span style="font-size:10px;padding:2px 8px;border-radius:20px;background:${b.bg};color:${b.col};flex-shrink:0">${b.lbl}</span></div>`;}).join('')}
+    </div>
+    <div class="xs" style="color:var(--dim);margin-top:8px;text-align:right">${quests.filter(q=>q.done).length}/3 izpildīts šodien</div>
   </div>
 
   <div class="card">
@@ -808,8 +818,12 @@ function saveBrain() {
 
 // ─── FINANCE ─────────────────────────────────────────────
 let _finType='salary';
+let _finView='finance';
+let _brainView='notes';
 
 function renderFinance() {
+  const _ftabs=`<div class="tabs" style="margin-bottom:14px"><button class="tab${_finView==='finance'?' active':''}" onclick="_finView='finance';renderContent()">💰 Finanses</button><button class="tab${_finView==='investments'?' active':''}" onclick="_finView='investments';renderContent()">📈 Investīcijas</button></div>`;
+  if(_finView==='investments')return _ftabs+renderInvestments();
   const totalInc=(S.finance.income||[]).reduce((a,i)=>a+Number(i.amount),0);
   const totalExp=(S.finance.expenses||[]).reduce((a,e)=>a+Number(e.amount),0);
   const balance=totalInc-totalExp;
@@ -838,7 +852,7 @@ function renderFinance() {
     <div class="sec-title">💰 Finance</div>
     <div class="sec-sub">Finanšu uzskaite</div>
   </div>
-  <div class="inv-total" style="padding:22px">
+  `+_ftabs+`<div class="inv-total" style="padding:22px">
     <div style="font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Mans balanss</div>
     <div style="font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:${balance>=0?'var(--gold)':'#e05555'};line-height:1;margin-bottom:16px">${balance<0?'−':''}€${fmt(Math.abs(balance).toFixed(2))}</div>
     <div style="display:flex;justify-content:center;gap:32px">
@@ -1425,11 +1439,14 @@ function renderBrain() {
   const q=brainSearch.toLowerCase();
   const all=[...S.brain].reverse();
   const filtered=all.filter(n=>(brainCat==='Visi'||n.cat===brainCat)&&(!q||n.title.toLowerCase().includes(q)||n.content.toLowerCase().includes(q)));
+  const _btabs=`<div class="tabs" style="margin-bottom:14px"><button class="tab${_brainView==='notes'?' active':''}" onclick="_brainView='notes';renderContent()">🧠 Piezīmes</button><button class="tab${_brainView==='ideas'?' active':''}" onclick="_brainView='ideas';renderContent()">💡 Idejas</button></div>`;
+  if(_brainView==='ideas')return _btabs+renderIdeas();
   return `
   <div class="sec-hdr">
     <div class="sec-title">🧠 Second Brain</div>
     <div class="sec-sub">Idejas, piezīmes, citāti, links — viss vienā vietā</div>
   </div>
+  `+_btabs+`
   <div class="card">
     <div class="card-h"><span class="card-title">Pievienot</span></div>
     <div class="col">
@@ -1849,7 +1866,7 @@ function renderContent() {
     case 'journal':      el.innerHTML=renderJournal(); break;
     case 'second-brain': el.innerHTML=renderBrain(); break;
     case 'finance':      el.innerHTML=renderFinance(); break;
-    case 'body':         el.innerHTML=renderBody()+renderBodyHistory(); break;
+    case 'body':         el.innerHTML=renderBody()+renderBodyHistory()+renderMoodPage(); break;
     case 'investments':  el.innerHTML=renderInvestments(); break;
     case 'mood':         el.innerHTML=renderMoodPage(); break;
     case 'news':         el.innerHTML=renderNews(); break;
